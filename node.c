@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-int fork_process(pid_t pid, char *args[]){
+int fork_process(pid_t pid, char *const args[]){
         pid = fork();
 
         if (pid < 0){
@@ -20,25 +20,21 @@ int fork_process(pid_t pid, char *args[]){
         return EXIT_SUCCESS;
 }
 
-int run(){
-        pid_t server_pid;
-        pid_t client_pid;
-        int server_status;
-        int client_status;
-        char *server_args[] = {"./server", NULL};
-        char *client_args[] = {"./client", NULL};
+int run(char *const args[]){
+        pid_t pid;
+        int status;
 
-        fork_process(server_pid, server_args);
-        fork_process(client_pid, client_args);
-
-        waitpid(client_pid, &client_status, 0);
-        waitpid(server_pid, &server_status, 0);
+        fork_process(pid, args);
+        waitpid(pid, &status, 0);
 }
 
-int main (int arc, int **argv){
+int main (int argc, char **argv){
 
         // CMD line parsing...
-        run();
+        char *const server_args[] = {argv[1], NULL};
+        char *const client_args[] = {argv[2], NULL};
+        run(server_args);
+        run(client_args);
 
         return EXIT_SUCCESS;
 }
