@@ -5,7 +5,7 @@ void run_server(){
         printf("Server is running\n");
 }
 
-int main (int arc, int **argv){
+int main (int argc, int **argv){
         run_server();
 
         return EXIT_SUCCESS;
