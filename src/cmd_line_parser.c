@@ -35,7 +35,7 @@ static void print_usage(const char *prog_name) {
 }
 
 static void verify_required_args(){
-
+        //TODO: Implement.
 }
 
 static void build_args(){
