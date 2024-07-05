@@ -6,13 +6,17 @@
 
 #include "cmd_line_parser.h"
 
-int fork_process(pid_t pid, char *const args[]){
+int fork_process(pid_t pid, char *const args[])
+{
         pid = fork();
 
-        if (pid < 0){
+        if (pid < 0)
+        {
                 perror("Failed to fork process");
                 exit(EXIT_FAILURE);
-        } else if (pid == 0){
+        }
+        else if (pid == 0)
+        {
                 execvp(args[0], args);
 
                 perror("Failed to execute process");
@@ -22,7 +26,8 @@ int fork_process(pid_t pid, char *const args[]){
         return EXIT_SUCCESS;
 }
 
-int run(char *const args[]){
+int run(char *const args[])
+{
         pid_t pid;
         int status;
 
@@ -30,7 +35,8 @@ int run(char *const args[]){
         waitpid(pid, &status, 0);
 }
 
-int main (int argc, char **argv){
+int main(int argc, char **argv)
+{
 
         get_args(argc, argv);
         run(server_arg_list);
