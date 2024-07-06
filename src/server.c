@@ -5,7 +5,8 @@
 #include <arpa/inet.h>
 
 #define PORT (8080)
-#define SEND_BUFFER_BYTE_SIZE (1024)
+#define ECHO ("ECHO:")
+#define SEND_BUFFER_BYTE_SIZE (1024 + strlen(ECHO))
 #define RECV_BUFFER_BYTE_SIZE (1024)
 
 void run_server()
@@ -63,11 +64,11 @@ void run_server()
 
         printf("Connection accepted\n");
 
-        strcpy(send_buff, "Hi client, I'm a server");
         if ((bytes_recived = recv(request_fd, recv_buff, RECV_BUFFER_BYTE_SIZE, 0)) > 0)
         {
-                send(request_fd, send_buff, strlen(send_buff) + 1, 0);
                 printf("Received: %s\n", recv_buff);
+                sprintf(send_buff, "%s %s", ECHO, recv_buff);
+                send(request_fd, send_buff, strlen(send_buff) + 1, 0);
         }
         else
         {
