@@ -10,7 +10,7 @@ int fork_process(pid_t pid, char *const args[])
 {
         pid = fork();
 
-        if (pid < 0)
+        if (pid == -1)
         {
                 perror("Failed to fork process");
                 exit(EXIT_FAILURE);
@@ -37,10 +37,9 @@ int run(char *const args[])
 
 int main(int argc, char **argv)
 {
-
-        get_args(argc, argv);
-        run(server_arg_list);
-        run(client_arg_list);
+        get_cmds(argc, argv);
+        run(server_cmd);
+        run(client_cmd);
 
         return EXIT_SUCCESS;
 }
