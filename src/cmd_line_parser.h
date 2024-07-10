@@ -1,9 +1,9 @@
 #ifndef CMD_LINE_PARSER
 #define CMD_LINE_PARSER
 
-extern char * server_arg_list[];
-extern char * client_arg_list[];
+extern char *server_cmd[];
+extern char *client_cmd[];
 
-void get_args(int argc, char **argv);
+void get_cmds(int argc, char **argv);
 
-#endif //CMD_LINE_PARSER
+#endif // CMD_LINE_PARSER

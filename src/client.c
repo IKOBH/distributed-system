@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
+#define IP ("127.0.0.1")
 #define PORT (8080)
 #define SEND_BUFFER_BYTE_SIZE (1024)
 #define RECV_BUFFER_BYTE_SIZE (1024)
@@ -28,7 +29,7 @@ void run_client()
         address.sin_family = AF_INET;
         address.sin_port = htons(PORT);
 
-        if (inet_pton(AF_INET, "127.0.0.1", &address.sin_addr) <= 0)
+        if (inet_pton(AF_INET, IP, &address.sin_addr) <= 0)
         {
                 perror("Invalid address/ Address not supported");
                 close(client_fd);
