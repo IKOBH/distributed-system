@@ -18,7 +18,6 @@ int fork_process(pid_t pid, char *const args[])
         else if (pid == 0)
         {
                 execvp(args[0], args);
-
                 perror("Failed to execute process");
                 exit(EXIT_FAILURE);
         }
