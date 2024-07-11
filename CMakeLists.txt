@@ -4,6 +4,8 @@ project(node VERSION 0.1.0 LANGUAGES C)
 add_executable(node 
         src/cmd_line_parser.c
         src/cmd_line_parser.h
+        src/pipe_utils.c
+        src/pipe_utils.h
         src/node.c)
 
 add_executable(server
