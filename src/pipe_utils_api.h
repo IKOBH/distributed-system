@@ -2,12 +2,6 @@
 
 typedef enum
 {
-        E_SERVER_PROC,
-        E_CLIENT_PROC
-} process_t;
-
-typedef enum
-{
         E_PIPE_STEP_CALL,
         E_PIPE_STEP_CHILD,
         E_PIPE_STEP_PARENT,
@@ -20,4 +14,4 @@ typedef enum
         E_PIPE_DIR_CHILD_TO_PARENT  /*Child write, parent reads.*/
 } pipe_direction_t;
 
-void handle_client_pipe(process_t proc, int *fd, pipe_step_t step, pipe_direction_t dir);
+void handle_pipe(int *fd, pipe_step_t step, pipe_direction_t dir);

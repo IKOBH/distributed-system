@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <getopt.h>
 
-#include "cmd_line_parser.h"
+#include "cmd_line_parser_api.h"
 
 #define SERVER_INPUT_ARG (1000)
 #define CLIENT_INPUT_ARG (1001)

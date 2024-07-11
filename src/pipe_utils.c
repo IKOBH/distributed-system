@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-#include "pipe_utils.h"
+#include "pipe_utils_api.h"
 
 typedef enum
 {
@@ -9,16 +9,11 @@ typedef enum
         E_PIPE_END_WRITE
 } pipe_end_t;
 
-void handle_client_pipe(process_t proc, int *fd, pipe_step_t step, pipe_direction_t dir)
+void handle_pipe(int *fd, pipe_step_t step, pipe_direction_t dir)
 {
         pipe_end_t child_pipe_end_to_close = dir ? E_PIPE_END_READ : E_PIPE_END_WRITE;
         pipe_end_t child_pipe_end_to_duplicate = 1 - child_pipe_end_to_close;
         pipe_end_t parent_pipe_end_to_close = child_pipe_end_to_duplicate;
-
-        if (proc != E_CLIENT_PROC)
-        {
-                return;
-        }
 
         switch (step)
         {
