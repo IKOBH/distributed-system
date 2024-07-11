@@ -3,10 +3,11 @@ project(node VERSION 0.1.0 LANGUAGES C)
 
 add_executable(node 
         src/cmd_line_parser.c
-        src/cmd_line_parser.h
+        src/cmd_line_parser_api.h
         src/pipe_utils.c
-        src/pipe_utils.h
-        src/node.c)
+        src/pipe_utils_api.h
+        src/node.c
+        src/node_wrapper.h)
 
 add_executable(server
         src/server.c)

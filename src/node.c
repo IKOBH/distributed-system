@@ -4,8 +4,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "cmd_line_parser.h"
-#include "pipe_utils.h"
+#include "node_wrapper.h"
 
 int fork_process(process_t proc, pid_t pid, char *const args[])
 {
