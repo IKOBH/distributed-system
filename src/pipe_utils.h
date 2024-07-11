@@ -1,5 +1,4 @@
-#ifndef PIPE_UTILS
-#define PIPE_UTILS
+#pragma once
 
 typedef enum
 {
@@ -28,5 +27,3 @@ typedef enum
 } pipe_direction_t;
 
 void handle_client_pipe(process_t proc, int *fd, pipe_step_t step, pipe_direction_t dir);
-
-#endif // PIPE_UTILS
