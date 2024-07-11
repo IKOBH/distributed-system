@@ -9,9 +9,9 @@ typedef enum
         E_PIPE_END_WRITE
 } pipe_end_t;
 
-void handle_pipe(int *fd, pipe_step_t step, pipe_direction_t dir)
+void handle_pipe(int *fd, pipe_step_t step, pipe_direction_t direction)
 {
-        pipe_end_t child_pipe_end_to_close = dir ? E_PIPE_END_READ : E_PIPE_END_WRITE;
+        pipe_end_t child_pipe_end_to_close = direction ? E_PIPE_END_READ : E_PIPE_END_WRITE;
         pipe_end_t child_pipe_end_to_duplicate = 1 - child_pipe_end_to_close;
         pipe_end_t parent_pipe_end_to_close = child_pipe_end_to_duplicate;
 
