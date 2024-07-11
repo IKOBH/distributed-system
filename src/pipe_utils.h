@@ -16,12 +16,6 @@ typedef enum
 
 typedef enum
 {
-        E_PIPE_END_READ,
-        E_PIPE_END_WRITE
-} pipe_end_t;
-
-typedef enum
-{
         E_PIPE_DIR_PARENT_TO_CHILD, /*Parent write, child reads.*/
         E_PIPE_DIR_CHILD_TO_PARENT  /*Child write, parent reads.*/
 } pipe_direction_t;
