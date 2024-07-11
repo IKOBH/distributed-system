@@ -3,6 +3,12 @@
 #include <unistd.h>
 #include "pipe_utils.h"
 
+typedef enum
+{
+        E_PIPE_END_READ,
+        E_PIPE_END_WRITE
+} pipe_end_t;
+
 void handle_client_pipe(process_t proc, int *fd, pipe_step_t step, pipe_direction_t dir)
 {
         pipe_end_t child_pipe_end_to_close = dir ? E_PIPE_END_READ : E_PIPE_END_WRITE;
