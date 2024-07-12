@@ -14,4 +14,7 @@ typedef enum
         E_PIPE_DIR_CHILD_TO_PARENT  /*Child write, parent reads.*/
 } pipe_direction_t;
 
-void handle_pipe(int *fd, pipe_step_t step, pipe_direction_t dir);
+void handle_pipe_create(int pipe_fd[]);
+void handle_child_pipe_end(int pipe_fd[], pipe_direction_t direction);
+void handle_parent_pipe_end(int pipe_fd[], pipe_direction_t direction);
+void handle_pipe_fork_failure(int pipe_fd[]);
