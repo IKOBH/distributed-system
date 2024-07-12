@@ -1,73 +1,68 @@
 #include "node_wrapper.h"
 
-int fork_process(pid_t pid, char *const args[], bool use_pipe, pipe_direction_t pipe_direct)
+int fork_process(pid_t *pid_p, char *const args[], bool use_pipe, pipe_direction_t pipe_direct)
 {
         int pipe_fd[2] = {0};
 
-        if (use_pipe)
-                handle_pipe_create(pipe_fd);
+        try_handle_pipe_create(pipe_fd, use_pipe);
 
-        pid = fork();
+        *pid_p = fork();
 
-        if (pid == -1)
+        if (*pid_p == -1)
         {
                 perror("Failed to fork process");
-                if (use_pipe)
-                        handle_pipe_fork_failure(pipe_fd);
+
+                try_handle_pipe_fork_failure(pipe_fd, use_pipe);
                 exit(EXIT_FAILURE);
         }
-        else if (pid == 0)
+        else if (*pid_p == 0)
         {
-                if (use_pipe)
-                        handle_child_pipe_end(pipe_fd, pipe_direct);
+
+                try_handle_child_pipe_end(pipe_fd, pipe_direct, use_pipe);
                 execvp(args[0], args);
                 perror("Failed to execute process");
                 exit(EXIT_FAILURE);
         }
 
-        if (use_pipe)
-                handle_parent_pipe_end(pipe_fd, pipe_direct);
+        try_handle_parent_pipe_end(pipe_fd, pipe_direct, use_pipe);
 
         return EXIT_SUCCESS;
 }
 
-int executes(process_t proc, char *const args[], bool use_pipe)
-{
-        pid_t pid;
-        int status;
-        pipe_direction_t pipe_direct = E_PIPE_DIR_PARENT_TO_CHILD;
-
-        // TODO: pass pid by refereance & not by value
-        fork_process(pid, args, use_pipe, pipe_direct);
-        waitpid(pid, &status, 0);
-
-        // TODO: return value or change signature
-}
-
-int run_client()
+int run_client(pid_t *pid_p)
 {
         int ret = EXIT_SUCCESS;
+        bool use_pipe = true;
+        pipe_direction_t pipe_direct = E_PIPE_DIR_PARENT_TO_CHILD;
 
-        // printf("DEBUG: Client\n");
-        ret |= executes(E_CLIENT_PROC, client_cmd, true);
+        ret |= fork_process(pid_p, client_cmd, use_pipe, pipe_direct);
         return ret;
 }
 
-int run_server()
+int run_server(pid_t *pid_p)
 {
         int ret = EXIT_SUCCESS;
+        bool use_pipe = false;
+        // TODO: No need in  'pipe_direct' in server. Fix this.
+        pipe_direction_t pipe_direct = E_PIPE_DIR_PARENT_TO_CHILD;
 
-        ret |= executes(E_SERVER_PROC, server_cmd, false);
+        ret |= fork_process(pid_p, server_cmd, use_pipe, pipe_direct);
         return ret;
 }
 
 int run_node()
 {
+        // TODO: No need in both ret & status
         int ret = EXIT_SUCCESS;
+        pid_t pid[2];
+        int status;
 
-        // TODO: Resolve race condition. Waiting for server pid before running client.
-        ret |= run_server();
-        ret |= run_client();
+        ret |= run_server(&(pid[0]));
+        ret |= run_client(&(pid[1]));
+
+        // TODO: Handle 'status' before reusing it.
+        waitpid(pid[0], &status, 0);
+        waitpid(pid[1], &status, 0);
         return ret;
 }
 
