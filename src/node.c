@@ -1,52 +1,80 @@
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-
 #include "node_wrapper.h"
 
-int fork_process(process_t proc, pid_t pid, char *const args[])
+int fork_process(pid_t pid, char *const args[], bool use_pipe, pipe_direction_t pipe_direct)
 {
-        int input_fd[2] = {0};
+        int pipe_fd[2] = {0};
 
-        handle_client_pipe(proc, input_fd, E_PIPE_STEP_CALL, E_PIPE_DIR_PARENT_TO_CHILD);
+        if (use_pipe)
+                handle_pipe_create(pipe_fd);
 
         pid = fork();
 
         if (pid == -1)
         {
                 perror("Failed to fork process");
-                handle_client_pipe(proc, input_fd, E_PIPE_STEP_FORK_FAILURE, E_PIPE_DIR_PARENT_TO_CHILD);
+                if (use_pipe)
+                        handle_pipe_fork_failure(pipe_fd);
                 exit(EXIT_FAILURE);
         }
         else if (pid == 0)
         {
-                handle_client_pipe(proc, input_fd, E_PIPE_STEP_CHILD, E_PIPE_DIR_PARENT_TO_CHILD);
+                if (use_pipe)
+                        handle_child_pipe_end(pipe_fd, pipe_direct);
                 execvp(args[0], args);
                 perror("Failed to execute process");
                 exit(EXIT_FAILURE);
         }
 
-        handle_client_pipe(proc, input_fd, E_PIPE_STEP_PARENT, E_PIPE_DIR_PARENT_TO_CHILD);
+        if (use_pipe)
+                handle_parent_pipe_end(pipe_fd, pipe_direct);
 
         return EXIT_SUCCESS;
 }
 
-int run(process_t proc, char *const args[])
+int executes(process_t proc, char *const args[], bool use_pipe)
 {
         pid_t pid;
         int status;
+        pipe_direction_t pipe_direct = E_PIPE_DIR_PARENT_TO_CHILD;
 
-        fork_process(proc, pid, args);
+        // TODO: pass pid by refereance & not by value
+        fork_process(pid, args, use_pipe, pipe_direct);
         waitpid(pid, &status, 0);
+
+        // TODO: return value or change signature
+}
+
+int run_client()
+{
+        int ret = EXIT_SUCCESS;
+
+        // printf("DEBUG: Client\n");
+        ret |= executes(E_CLIENT_PROC, client_cmd, true);
+        return ret;
+}
+
+int run_server()
+{
+        int ret = EXIT_SUCCESS;
+
+        ret |= executes(E_SERVER_PROC, server_cmd, false);
+        return ret;
+}
+
+int run_node()
+{
+        int ret = EXIT_SUCCESS;
+
+        // TODO: Resolve race condition. Waiting for server pid before running client.
+        ret |= run_server();
+        ret |= run_client();
+        return ret;
 }
 
 int main(int argc, char **argv)
 {
+        // TODO: Manage return values. Also return values of cmd_line_parser module.
         get_cmds(argc, argv);
-        run(E_SERVER_PROC, server_cmd);
-        run(E_CLIENT_PROC, client_cmd);
-
+        run_node();
         return EXIT_SUCCESS;
 }
