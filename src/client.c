@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <pthread.h>
 #include <arpa/inet.h>
 
 #define IP ("127.0.0.1")
@@ -23,15 +24,57 @@
 /**
  * @brief    Text
  *
+ * @param    args                My Param doc
+ * @return   void*
+ */
+void *spin_recv(void *args)
+{
+        int client_fd = *(int *)(args);
+        char recv_buff[RECV_BUFFER_BYTE_SIZE];
+        int bytes_recived = 0;
+
+        printf("Spin Recieve\n");
+        if ((bytes_recived = recv(client_fd, recv_buff, RECV_BUFFER_BYTE_SIZE, 0)) > 0)
+        {
+                printf("Received: %s\n", recv_buff);
+        }
+        else
+        {
+                perror("Failed to receive data");
+        }
+}
+
+/**
+ * @brief    Text
+ *
+ * @param    args                My Param doc
+ * @return   void*
+ */
+void *spin_send(void *args)
+{
+        int client_fd = *(int *)(args);
+        char send_buff[SEND_BUFFER_BYTE_SIZE];
+
+        printf("Spin Send\n");
+        strcpy(send_buff, "Hi, I'm a client");
+
+        if (send(client_fd, send_buff, strlen(send_buff) + 1, 0) < 0)
+        {
+                perror("Failed to send data");
+                close(client_fd);
+                exit(EXIT_FAILURE);
+        }
+}
+
+/**
+ * @brief    Text
+ *
  */
 void run_client()
 {
         int client_fd;
         struct sockaddr_in address;
         unsigned int addrlen = sizeof(address);
-        char send_buff[SEND_BUFFER_BYTE_SIZE];
-        char recv_buff[RECV_BUFFER_BYTE_SIZE];
-        int bytes_recived = 0;
 
         printf("Client process created\n");
 
@@ -58,23 +101,13 @@ void run_client()
                 exit(EXIT_FAILURE);
         }
 
-        strcpy(send_buff, "Hi, I'm a client");
+        pthread_t send_thread, recv_thread;
 
-        if (send(client_fd, send_buff, strlen(send_buff) + 1, 0) < 0)
-        {
-                perror("Failed to send data");
-                close(client_fd);
-                exit(EXIT_FAILURE);
-        }
-
-        if ((bytes_recived = recv(client_fd, recv_buff, RECV_BUFFER_BYTE_SIZE, 0)) > 0)
-        {
-                printf("Received: %s\n", recv_buff);
-        }
-        else
-        {
-                perror("Failed to receive data");
-        }
+        // TODO: Check return values.
+        pthread_create(&send_thread, NULL, spin_send, &client_fd);
+        pthread_create(&recv_thread, NULL, spin_recv, &client_fd);
+        pthread_join(send_thread, NULL);
+        pthread_join(recv_thread, NULL);
 
         close(client_fd);
 }
