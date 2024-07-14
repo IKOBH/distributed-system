@@ -13,9 +13,7 @@ typedef enum
 void pipe_ctx_init(pipe_ctx_t *pipe_ctx, pipe_direction_t direction)
 {
         if (!pipe_ctx)
-        {
                 return;
-        }
 
         pipe_ctx->direction = direction;
         if (pipe(pipe_ctx->pipe_fd) == -1)
@@ -28,9 +26,7 @@ void pipe_ctx_init(pipe_ctx_t *pipe_ctx, pipe_direction_t direction)
 void handle_child_pipe_end(pipe_ctx_t *pipe_ctx)
 {
         if (!pipe_ctx)
-        {
                 return;
-        }
 
         int *pipe_fd = pipe_ctx->pipe_fd;
         pipe_direction_t direction = pipe_ctx->direction;
@@ -49,9 +45,7 @@ void handle_child_pipe_end(pipe_ctx_t *pipe_ctx)
 void handle_after_use_child_pipe_end(pipe_ctx_t *pipe_ctx)
 {
         if (!pipe_ctx)
-        {
                 return;
-        }
 
         int *pipe_fd = pipe_ctx->pipe_fd;
         pipe_direction_t direction = pipe_ctx->direction;
@@ -63,9 +57,7 @@ void handle_after_use_child_pipe_end(pipe_ctx_t *pipe_ctx)
 void handle_parent_pipe_end(pipe_ctx_t *pipe_ctx)
 {
         if (!pipe_ctx)
-        {
                 return;
-        }
 
         int *pipe_fd = pipe_ctx->pipe_fd;
         pipe_direction_t direction = pipe_ctx->direction;
@@ -77,9 +69,7 @@ void handle_parent_pipe_end(pipe_ctx_t *pipe_ctx)
 void handle_pipe_fork_failure(pipe_ctx_t *pipe_ctx)
 {
         if (!pipe_ctx)
-        {
                 return;
-        }
 
         int *pipe_fd = pipe_ctx->pipe_fd;
 
@@ -91,9 +81,7 @@ void handle_pipe_fork_failure(pipe_ctx_t *pipe_ctx)
 void pipe_ctx_exit(pipe_ctx_t *pipe_ctx)
 {
         if (!pipe_ctx)
-        {
                 return;
-        }
 
         int *pipe_fd = pipe_ctx->pipe_fd;
         pipe_direction_t direction = pipe_ctx->direction;
