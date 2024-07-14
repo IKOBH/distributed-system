@@ -2,12 +2,14 @@
 
 typedef enum
 {
-        E_PIPE_STEP_CALL,
-        E_PIPE_STEP_CHILD,
-        E_PIPE_STEP_PARENT,
-        E_PIPE_STEP_FORK_FAILURE
-} pipe_step_t;
-
+        E_PIPE_STATE_UNINITIALIZED,
+        E_PIPE_STATE_INITIALIZED,
+        E_PIPE_STATE_CHILD_READY_TO_USE,
+        E_PIPE_STATE_CHILD_DONE,
+        E_PIPE_STATE_PARENT_READY_TO_USE,
+        E_PIPE_STATE_PARENT_DONE,
+        E_PIPE_STATE_FORK_FAILURE
+} pipe_state_t;
 typedef enum
 {
         E_PIPE_DIR_PARENT_TO_CHILD, /*Parent write, child reads.*/
@@ -17,6 +19,7 @@ typedef enum
 typedef struct pipe_ctx_t
 {
         int pipe_fd[2];
+        pipe_state_t state;
         pipe_direction_t direction;
 } pipe_ctx_t;
 
