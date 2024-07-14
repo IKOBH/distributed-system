@@ -9,6 +9,11 @@ typedef enum
         E_PIPE_END_WRITE
 } pipe_end_t;
 
+static inline pipe_end_t get_opposite_pipe_end(pipe_end_t pipe_end)
+{
+        return 1 - pipe_end;
+}
+
 static void handle_pipe(pipe_ctx_t *pipe_ctx, pipe_state_t state)
 {
         if (!pipe_ctx)
@@ -48,7 +53,7 @@ static void handle_pipe(pipe_ctx_t *pipe_ctx, pipe_state_t state)
         }
 
         close(pipe_fd[pipe_end]);
-        duplicated_pipe_end = 1 - pipe_end;
+        duplicated_pipe_end = get_opposite_pipe_end(pipe_end);
 
         if (pipe_ctx->state == E_PIPE_STATE_CHILD_READY_TO_USE)
         {
