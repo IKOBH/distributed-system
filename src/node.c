@@ -1,4 +1,12 @@
-#include "node_wrapper.h"
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <stdbool.h>
+
+#include "cmd_line_parser_api.h"
+#include "pipe_utils_api.h"
 
 #define handle_error_en(en, msg)    \
         do                          \
@@ -15,31 +23,26 @@
                 exit(EXIT_FAILURE); \
         } while (0)
 
-int fork_process(pid_t *pid_p, char *const args[], bool use_pipe, pipe_direction_t pipe_direct)
+int fork_process(pid_t *pid_p, char *const args[], pipe_ctx_t *pipe_ctx)
 {
-        int pipe_fd[2] = {0};
-
-        try_handle_pipe_create(pipe_fd, use_pipe);
-
         *pid_p = fork();
 
         if (*pid_p == -1)
         {
                 perror("Failed to fork process");
 
-                try_handle_pipe_fork_failure(pipe_fd, use_pipe);
+                handle_pipe_fork_failure(pipe_ctx);
                 exit(EXIT_FAILURE);
         }
         else if (*pid_p == 0)
         {
 
-                try_handle_child_pipe_end(pipe_fd, pipe_direct, use_pipe);
+                handle_child_pipe_end(pipe_ctx);
                 execvp(args[0], args);
                 perror("Failed to execute process");
                 exit(EXIT_FAILURE);
         }
-
-        try_handle_parent_pipe_end(pipe_fd, pipe_direct, use_pipe);
+        handle_parent_pipe_end(pipe_ctx);
 
         return EXIT_SUCCESS;
 }
@@ -47,10 +50,12 @@ int fork_process(pid_t *pid_p, char *const args[], bool use_pipe, pipe_direction
 int run_client(pid_t *pid_p)
 {
         int ret = EXIT_SUCCESS;
-        bool use_pipe = true;
-        pipe_direction_t pipe_direct = E_PIPE_DIR_PARENT_TO_CHILD;
+        pipe_ctx_t pipe_ctx;
 
-        ret |= fork_process(pid_p, client_cmd, use_pipe, pipe_direct);
+        pipe_ctx_init(&pipe_ctx, E_PIPE_DIR_PARENT_TO_CHILD);
+
+        ret |= fork_process(pid_p, client_cmd, &pipe_ctx);
+        pipe_ctx_exit(&pipe_ctx);
         return ret;
 }
 
@@ -61,7 +66,7 @@ int run_server(pid_t *pid_p)
         // TODO: No need in  'pipe_direct' in server. Fix this.
         pipe_direction_t pipe_direct = E_PIPE_DIR_PARENT_TO_CHILD;
 
-        ret |= fork_process(pid_p, server_cmd, use_pipe, pipe_direct);
+        ret |= fork_process(pid_p, server_cmd, NULL);
         return ret;
 }
 
