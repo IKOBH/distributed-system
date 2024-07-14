@@ -1,5 +1,20 @@
 #include "node_wrapper.h"
 
+#define handle_error_en(en, msg)    \
+        do                          \
+        {                           \
+                errno = en;         \
+                perror(msg);        \
+                exit(EXIT_FAILURE); \
+        } while (0)
+
+#define handle_error(msg)           \
+        do                          \
+        {                           \
+                perror(msg);        \
+                exit(EXIT_FAILURE); \
+        } while (0)
+
 int fork_process(pid_t *pid_p, char *const args[], bool use_pipe, pipe_direction_t pipe_direct)
 {
         int pipe_fd[2] = {0};
