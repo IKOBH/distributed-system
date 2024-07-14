@@ -29,6 +29,7 @@ void handle_child_pipe_end(int pipe_fd[], pipe_direction_t direction)
                 perror("Failed to duplicate read-end of pipe to STDIN");
                 exit(EXIT_FAILURE);
         }
+        close(pipe_fd[child_pipe_end_to_duplicate]);
 }
 
 void handle_parent_pipe_end(int pipe_fd[], pipe_direction_t direction)
