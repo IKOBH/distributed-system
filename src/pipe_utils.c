@@ -9,6 +9,7 @@ typedef enum
         E_PIPE_END_WRITE
 } pipe_end_t;
 
+/* Used in parent process*/
 void pipe_ctx_init(pipe_ctx_t *pipe_ctx, pipe_direction_t direction)
 {
         if (!pipe_ctx)
@@ -45,6 +46,20 @@ void handle_child_pipe_end(pipe_ctx_t *pipe_ctx)
         close(pipe_fd[child_pipe_end_to_duplicate]);
 }
 
+void handle_after_use_child_pipe_end(pipe_ctx_t *pipe_ctx)
+{
+        if (!pipe_ctx)
+        {
+                return;
+        }
+
+        int *pipe_fd = pipe_ctx->pipe_fd;
+        pipe_direction_t direction = pipe_ctx->direction;
+        pipe_end_t child_pipe_end_to_close = direction ? E_PIPE_END_WRITE : E_PIPE_END_READ;
+
+        close(pipe_fd[child_pipe_end_to_close]);
+}
+
 void handle_parent_pipe_end(pipe_ctx_t *pipe_ctx)
 {
         if (!pipe_ctx)
@@ -72,6 +87,7 @@ void handle_pipe_fork_failure(pipe_ctx_t *pipe_ctx)
         close(pipe_fd[E_PIPE_END_WRITE]);
 }
 
+/* Used in parent process*/
 void pipe_ctx_exit(pipe_ctx_t *pipe_ctx)
 {
         if (!pipe_ctx)
