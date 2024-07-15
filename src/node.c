@@ -63,8 +63,6 @@ int run_server(pid_t *pid_p)
 {
         int ret = EXIT_SUCCESS;
         bool use_pipe = false;
-        // TODO: No need in  'pipe_direct' in server. Fix this.
-        pipe_direction_t pipe_direct = E_PIPE_DIR_PARENT_TO_CHILD;
 
         ret |= fork_process(pid_p, server_cmd, NULL);
         return ret;
@@ -77,6 +75,10 @@ int run_node()
         pid_t pid[2];
         int status;
 
+        // FIXME: Race condition when client process is created before server.
+        // Note that clients are supposed to talk to remote servers,
+        // not necesserally the server launced from same node.
+        // Thus, it might not considered as a BUG.
         ret |= run_server(&(pid[0]));
         ret |= run_client(&(pid[1]));
 
