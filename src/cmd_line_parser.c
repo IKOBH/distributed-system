@@ -63,9 +63,9 @@ static void print_usage(const char *prog_name)
         printf("\t It can run any custom client & server pair you wish for, as long as you supply the relevant executables & args.\n\n");
         printf("Usage:\t%s -s server executable [--server_args] -c client executable [--client_args] [-h]\n\n", prog_name);
         printf("\t-s server executable\tSpecify the server executable\n");
-        printf("\t--server_args server arguments\tSpecify the user arguments for the server\n");
+        printf("\t--server args server arguments\tSpecify the user arguments for the server\n");
         printf("\t-c client executable\tSpecify the client executable\n");
-        printf("\t--client_args client arguments\tSpecify the user arguments for the client\n");
+        printf("\t--client args client arguments\tSpecify the user arguments for the client\n");
         printf("\t-h\t\t\tDisplay this help message and exit\n");
 }
 
