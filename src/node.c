@@ -138,3 +138,8 @@ int main(int argc, char **argv)
         run_node();
         return EXIT_SUCCESS;
 }
+
+// TODO:Add logger capabilities.
+// TODO: Add shared memory between client & server optionally by user(user-decided or default size)
+// TODO: Add config file support as input & parsed by parser. Config file will include all possibale params & if not specified by user, will resault in default config.
+// TODO: Support multiline todos detection.
