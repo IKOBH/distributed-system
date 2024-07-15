@@ -20,6 +20,32 @@
 #define PORT (8080)
 #define SEND_BUFFER_BYTE_SIZE (1024)
 #define RECV_BUFFER_BYTE_SIZE (1024)
+#define CONNECT_SLEEP_GAP_US (10)
+
+/**
+ * @brief    Retry connecting server.
+ *
+ * @param    retries             retry attempt count (retries >= 0)
+ * @param    client_fd           socket file descriptor to connect.
+ * @param    address             server address.
+ * @param    addrlen             sizeof address struct.
+ */
+void retry_connect(int retries, int client_fd, struct sockaddr_in *address, unsigned int addrlen)
+{
+        int attempt_cnt = 0;
+        do
+        {
+                if (connect(client_fd, (struct sockaddr *)address, addrlen) == 0)
+                        return;
+
+                usleep(CONNECT_SLEEP_GAP_US);
+                fprintf(stdout, "Failed to connect to server. (Retry attempt %d/%d)\n", attempt_cnt, retries);
+        } while (++attempt_cnt <= retries);
+
+        perror("Failed to connect to server, no more retries.");
+        close(client_fd);
+        exit(EXIT_FAILURE);
+}
 
 /**
  * @brief    Text
@@ -94,12 +120,7 @@ void run_client()
                 exit(EXIT_FAILURE);
         }
 
-        if (connect(client_fd, (struct sockaddr *)&address, addrlen) < 0)
-        {
-                perror("Failed to connect socket");
-                close(client_fd);
-                exit(EXIT_FAILURE);
-        }
+        retry_connect(1, client_fd, &address, addrlen);
 
         pthread_t send_thread, recv_thread;
 
