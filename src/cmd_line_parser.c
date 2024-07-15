@@ -93,6 +93,17 @@ static void build_cmds()
 }
 
 /**
+ * @brief    Set the default command line argument values.
+ *
+ */
+void set_default()
+{
+        node_args.server_args.executable = "./server";
+        node_args.server_args.input = "";
+        node_args.client_args.executable = "./client";
+        node_args.client_args.input = "";
+}
+/**
  * @brief    Text
  *
  * @param    argc                My Param doc
@@ -102,6 +113,7 @@ static void parse_input(int argc, char **argv)
 {
         int opt;
 
+        set_default();
         while ((opt = getopt_long(argc, argv, "hs:c:", long_options, NULL)) != -1)
         {
                 switch (opt)
