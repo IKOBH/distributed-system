@@ -1,3 +1,14 @@
+/**
+ * @file     cmd_line_parser.c
+ * @author   Shahar Avidar  (ikobh7@gmail.com)
+ * @brief    Text
+ * @version  0.1
+ * @date     2024-07-15
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -41,6 +52,11 @@ static struct option long_options[] = {
     {"client_args", required_argument, 0, CLIENT_INPUT_ARG},
     {0, 0, 0, 0}};
 
+/**
+ * @brief    Text
+ *
+ * @param    prog_name           My Param doc
+ */
 static void print_usage(const char *prog_name)
 {
         printf("Desc:\t%s is a distributed peer to peer network skeleton capable of spinning both a client & a server.\n", prog_name);
@@ -53,11 +69,19 @@ static void print_usage(const char *prog_name)
         printf("\t-h\t\t\tDisplay this help message and exit\n");
 }
 
+/**
+ * @brief    Text
+ *
+ */
 static void verify_required_args()
 {
         // TODO: Implement.
 }
 
+/**
+ * @brief    Text
+ *
+ */
 static void build_cmds()
 {
         server_cmd[0] = node_args.server_args.executable;
@@ -68,6 +92,12 @@ static void build_cmds()
         client_cmd[2] = NULL;
 }
 
+/**
+ * @brief    Text
+ *
+ * @param    argc                My Param doc
+ * @param    argv                My Param doc
+ */
 static void parse_input(int argc, char **argv)
 {
         int opt;
@@ -99,6 +129,12 @@ static void parse_input(int argc, char **argv)
         }
 }
 
+/**
+ * @brief    Get the cmds objectText
+ *
+ * @param    argc                My Param doc
+ * @param    argv                My Param doc
+ */
 void get_cmds(int argc, char **argv)
 {
         parse_input(argc, argv);

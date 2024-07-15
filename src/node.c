@@ -1,3 +1,14 @@
+/**
+ * @file     node.c
+ * @author   Shahar Avidar  (ikobh7@gmail.com)
+ * @brief    Text
+ * @version  0.1
+ * @date     2024-07-15
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
+
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <stdlib.h>
@@ -23,6 +34,14 @@
                 exit(EXIT_FAILURE); \
         } while (0)
 
+/**
+ * @brief    Text
+ *
+ * @param    pid_p               My Param doc
+ * @param    args                My Param doc
+ * @param    pipe_ctx            My Param doc
+ * @return   int
+ */
 int fork_process(pid_t *pid_p, char *const args[], pipe_ctx_t *pipe_ctx)
 {
         *pid_p = fork();
@@ -47,6 +66,12 @@ int fork_process(pid_t *pid_p, char *const args[], pipe_ctx_t *pipe_ctx)
         return EXIT_SUCCESS;
 }
 
+/**
+ * @brief    Text
+ *
+ * @param    pid_p               My Param doc
+ * @return   int
+ */
 int run_client(pid_t *pid_p)
 {
         int ret = EXIT_SUCCESS;
@@ -59,6 +84,12 @@ int run_client(pid_t *pid_p)
         return ret;
 }
 
+/**
+ * @brief    Text
+ *
+ * @param    pid_p               My Param doc
+ * @return   int
+ */
 int run_server(pid_t *pid_p)
 {
         int ret = EXIT_SUCCESS;
@@ -68,6 +99,11 @@ int run_server(pid_t *pid_p)
         return ret;
 }
 
+/**
+ * @brief    Text
+ *
+ * @return   int
+ */
 int run_node()
 {
         // TODO: No need in both ret & status
@@ -88,6 +124,13 @@ int run_node()
         return ret;
 }
 
+/**
+ * @brief    Text
+ *
+ * @param    argc                My Param doc
+ * @param    argv                My Param doc
+ * @return   int
+ */
 int main(int argc, char **argv)
 {
         // TODO: Manage return values. Also return values of cmd_line_parser module.

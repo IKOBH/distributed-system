@@ -1,3 +1,14 @@
+/**
+ * @file     client.c
+ * @author   Shahar Avidar  (ikobh7@gmail.com)
+ * @brief    Text
+ * @version  0.1
+ * @date     2024-07-15
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -9,6 +20,10 @@
 #define SEND_BUFFER_BYTE_SIZE (1024)
 #define RECV_BUFFER_BYTE_SIZE (1024)
 
+/**
+ * @brief    Text
+ *
+ */
 void run_client()
 {
         int client_fd;
@@ -64,6 +79,13 @@ void run_client()
         close(client_fd);
 }
 
+/**
+ * @brief    Text
+ *
+ * @param    argc                My Param doc
+ * @param    argv                My Param doc
+ * @return   int
+ */
 int main(int argc, char **argv)
 {
         run_client();
