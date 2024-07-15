@@ -1,3 +1,14 @@
+/**
+ * @file     pipe_utils_api.h
+ * @author   Shahar Avidar  (ikobh7@gmail.com)
+ * @brief    Text
+ * @version  0.1
+ * @date     2024-07-15
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
+
 #pragma once
 
 typedef enum
@@ -23,9 +34,45 @@ typedef struct pipe_ctx_t
         pipe_direction_t direction;
 } pipe_ctx_t;
 
+/**
+ * @brief    Text
+ *
+ * @param    pipe_ctx            My Param doc
+ * @param    direction           My Param doc
+ */
 void pipe_ctx_init(pipe_ctx_t *pipe_ctx, pipe_direction_t direction);
+
+/**
+ * @brief    Text
+ *
+ * @param    pipe_ctx            My Param doc
+ */
 void handle_child_pipe_end(pipe_ctx_t *pipe_ctx);
+
+/**
+ * @brief    Text
+ *
+ * @param    pipe_ctx            My Param doc
+ */
 void handle_after_use_child_pipe_end(pipe_ctx_t *pipe_ctx);
+
+/**
+ * @brief    Text
+ *
+ * @param    pipe_ctx            My Param doc
+ */
 void handle_parent_pipe_end(pipe_ctx_t *pipe_ctx);
+
+/**
+ * @brief    Text
+ *
+ * @param    pipe_ctx            My Param doc
+ */
 void handle_pipe_fork_failure(pipe_ctx_t *pipe_ctx);
+
+/**
+ * @brief    Text
+ *
+ * @param    pipe_ctx            My Param doc
+ */
 void pipe_ctx_exit(pipe_ctx_t *pipe_ctx);
