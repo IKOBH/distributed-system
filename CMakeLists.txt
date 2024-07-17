@@ -6,8 +6,7 @@ add_executable(node
         src/cmd_line_parser_api.h
         src/pipe_utils.c
         src/pipe_utils_api.h
-        src/node.c
-        src/node_wrapper.h)
+        src/node.c)
 
 add_executable(server
         src/server.c)
