@@ -1,0 +1,56 @@
+# TODO: Add config.yaml & libyaml (or is it libyaml-dev?) to cmake depndencies.
+
+---
+# Default config
+
+struct sin_addr: &sin_addr
+- s_addr: INADDR_ANY
+
+struct sockaddr_in: &address
+- sin_family: "AF_INET"
+- sin_port: 8080
+- sin_addr: *sin_addr
+
+connection ctx: &connection
+- sockaddr_in: *address
+- send buffer size: 1024 #Bytes
+- recv buffer size: 1024 #Bytes
+
+connect retry ctx: &connect_retry
+- retry cnt: 0
+- retry sleep time: 0
+
+client ctx: &client
+- executable: "./client"
+- user_args: ""
+- connection ctx: *connection
+- connect retry ctx: *connect_retry
+
+server ctx: &server
+- executable: "./server"
+- user_args: ""
+- connection ctx: *connection
+
+node ctx:
+- *client
+- *server
+
+---
+# User defined config
+# TODO: Enable user define their own config.
+#       User defined take presedence of default configurations.
+# TODO: Support multi-user\multi-app configurations.
+#       Each user\app would have it own config which ovverrids the default,
+#       Thus enabling more than on app to use this config.yaml file.
+# TODO: Consider genertae user configs as seperate yaml files (e.g. yaml.user)
+#       I currently not sure it is necessary.
+#       Probably would like to support both options:
+#       i.e. both same file yaml documents & seperate files for each user\app.
+
+---
+# Run-Time config - Auto-Generated.
+# TODO: Auto-Generate the *full* runtime configuration used,
+#       by taking cmd line args which overrides user defined config,
+#       which in turn overrides default config.
+#TODO: Consider genertae runtime config as a seperate tmp file (e.g. yaml.runtime)
+...
