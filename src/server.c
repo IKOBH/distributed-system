@@ -30,7 +30,6 @@ void run_server()
         struct sockaddr_in address;
         int opt = 1;
         unsigned int addrlen = sizeof(address);
-        char buffer[1024] = {0};
         char send_buff[SEND_BUFFER_BYTE_SIZE];
         char recv_buff[RECV_BUFFER_BYTE_SIZE];
         int bytes_recived = 0;
@@ -70,6 +69,7 @@ void run_server()
 
         printf("Server is listening on port %d\n", PORT);
 
+        // TODO: Support more than one client by accepting more connections.(loop accept.)
         if ((request_fd = accept(server_fd, (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0)
         {
                 perror("Failed to accept connection");
