@@ -18,8 +18,80 @@
 
 #define IP ("127.0.0.1")
 #define PORT (8080)
+// TODO: Support varaiable length for both send & rsc buffers.
 #define SEND_BUFFER_BYTE_SIZE (1024)
 #define RECV_BUFFER_BYTE_SIZE (1024)
+#define CONNECT_SLEEP_GAP_US (10)
+
+typedef struct connection_ctx_t
+{
+        int fd;
+        struct sockaddr_in address;
+        // TODO:  Consider removing addrlen from struct since we can infer it from address.
+        unsigned int addrlen;
+        int port;
+        // TODO: Switch to static allocated pointer (char ip[16]) or using string API.
+        char *ip;
+        // TODO: Switch to dynamic allocated pointer (char *send_buff)
+        char send_buff[SEND_BUFFER_BYTE_SIZE];
+        // TODO: Switch to dynamic allocated pointer (char *send_buff)
+        char recv_buff[RECV_BUFFER_BYTE_SIZE];
+} connection_ctx_t;
+
+typedef struct connect_retry_ctx_t
+{
+        int retry_cnt;
+        int retry_sleep_time;
+} connect_retry_ctx_t;
+
+typedef struct client_ctx_t
+{
+        connection_ctx_t *connection_ctx;
+        connect_retry_ctx_t *retry_ctx;
+        // TODO: Handle 'user_args' recieved from cmd line & corresponds to client_args_t after parser refactor.
+        char *user_args;
+
+} client_ctx_t;
+
+void connection_ctx_init()
+{
+}
+
+void connect_retry_ctx_init(connect_retry_ctx_t *retry_ctx)
+{
+}
+
+void client_ctx_init(client_ctx_t *client_ctx)
+{
+        connection_ctx_init(client_ctx->connection_ctx);
+        connect_retry_ctx_init(client_ctx->retry_ctx);
+        client_ctx->user_args = NULL;
+}
+
+/**
+ * @brief    Retry connecting server.
+ *
+ * @param    retries             retry attempt count (retries >= 0)
+ * @param    client_fd           socket file descriptor to connect.
+ * @param    address             server address.
+ * @param    addrlen             sizeof address struct.
+ */
+void retry_connect(int retries, int client_fd, struct sockaddr_in *address, unsigned int addrlen)
+{
+        int attempt_cnt = 0;
+        do
+        {
+                if (connect(client_fd, (struct sockaddr *)address, addrlen) == 0)
+                        return;
+
+                usleep(CONNECT_SLEEP_GAP_US);
+                fprintf(stdout, "Failed to connect to server. (Retry attempt %d/%d)\n", attempt_cnt, retries);
+        } while (++attempt_cnt <= retries);
+
+        perror("Failed to connect to server, no more retries.");
+        close(client_fd);
+        exit(EXIT_FAILURE);
+}
 
 /**
  * @brief    Text
@@ -78,7 +150,7 @@ void run_client()
 
         printf("Client process created\n");
 
-        if ((client_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+        if ((client_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
         {
                 perror("Failed to create socket");
                 exit(EXIT_FAILURE);
@@ -94,12 +166,7 @@ void run_client()
                 exit(EXIT_FAILURE);
         }
 
-        if (connect(client_fd, (struct sockaddr *)&address, addrlen) < 0)
-        {
-                perror("Failed to connect socket");
-                close(client_fd);
-                exit(EXIT_FAILURE);
-        }
+        retry_connect(1, client_fd, &address, addrlen);
 
         pthread_t send_thread, recv_thread;
 
