@@ -36,7 +36,7 @@ void run_server()
 
         printf("Server process created\n");
 
-        if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+        if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
         {
                 perror("Failed to create socket");
                 exit(EXIT_FAILURE);
