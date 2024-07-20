@@ -40,7 +40,7 @@ void client_ctx_init(client_ctx_t *client_ctx)
  * @param    address             server address.
  * @param    addrlen             sizeof address struct.
  */
-void retry_connect(int retries, int client_fd, struct sockaddr_in *address, unsigned int addrlen)
+void client_retry_connect(int retries, int client_fd, struct sockaddr_in *address, unsigned int addrlen)
 {
         int attempt_cnt = 0;
         do
@@ -63,7 +63,7 @@ void retry_connect(int retries, int client_fd, struct sockaddr_in *address, unsi
  * @param    args                My Param doc
  * @return   void*
  */
-void *spin_recv(void *args)
+void *client_recv(void *args)
 {
         int client_fd = *(int *)(args);
         char recv_buff[RECV_BUFFER_BYTE_SIZE];
@@ -86,7 +86,7 @@ void *spin_recv(void *args)
  * @param    args                My Param doc
  * @return   void*
  */
-void *spin_send(void *args)
+void *client_send(void *args)
 {
         int client_fd = *(int *)(args);
         char send_buff[SEND_BUFFER_BYTE_SIZE];
@@ -104,7 +104,7 @@ void *spin_send(void *args)
  * @brief    Text
  *
  */
-void run_client()
+void client_run()
 {
         int client_fd;
         struct sockaddr_in address;
@@ -128,13 +128,13 @@ void run_client()
                 exit(EXIT_FAILURE);
         }
 
-        retry_connect(CONNECT_RETRIES, client_fd, &address, addrlen);
+        client_retry_connect(CONNECT_RETRIES, client_fd, &address, addrlen);
 
         pthread_t send_thread, recv_thread;
 
         // TODO: Check return values.
-        pthread_create(&send_thread, NULL, spin_send, &client_fd);
-        pthread_create(&recv_thread, NULL, spin_recv, &client_fd);
+        pthread_create(&send_thread, NULL, client_send, &client_fd);
+        pthread_create(&recv_thread, NULL, client_recv, &client_fd);
         pthread_join(send_thread, NULL);
         pthread_join(recv_thread, NULL);
 
@@ -150,7 +150,7 @@ void run_client()
  */
 int main(int argc, char **argv)
 {
-        run_client();
+        client_run();
 
         exit(EXIT_SUCCESS);
 }
