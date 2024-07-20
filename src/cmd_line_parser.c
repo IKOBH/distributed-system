@@ -19,9 +19,6 @@
 #define USER_ARGS_FOR_SERVER (1000)
 #define USER_ARGS_FOR_CLIENT (1001)
 
-#define SERVER_ARG_COUNT (3)
-#define CLIENT_ARG_COUNT (3)
-
 char *server_cmd[SERVER_ARG_COUNT];
 char *client_cmd[CLIENT_ARG_COUNT];
 
