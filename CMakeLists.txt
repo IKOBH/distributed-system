@@ -26,8 +26,10 @@ add_executable(node
 target_link_libraries(node ${YAML_LIBRARIES})
 
 add_executable(server
+        src/networking_api.h
         src/server.c)
 
 add_executable(client
+        src/networking_api.h
         src/client.c)
 
