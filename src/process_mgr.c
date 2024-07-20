@@ -14,7 +14,6 @@
 #include <sys/wait.h>
 
 #include "process_mgr_api.h"
-#include "pipe_utils_api.h"
 
 typedef struct input_ctx_t
 {
@@ -29,49 +28,88 @@ typedef struct input_ctx_t
  * @param    pipe_ctx            My Param doc
  * @return   int
  */
-static int fork_process(pid_t *pid_p, char *const args[])
+static int fork_process(pid_t *pid_p, char *const args[], pipe_ctx_t *pipe_ctx)
 {
-        // TODO: Make pipe_ctx a pointer & use malloc\free instead in get_pipe_ctx_from_user according to user's input.
-        //       This will also open the path to support different pipe configs to different processes.
-        //       Currently, all processes share the same pipe config.
-        pipe_ctx_t pipe_ctx;
-
         // TODO: Add support for multi-piping.
-        pipe_ctx_user_init(&pipe_ctx);
-        pipe_ctx_init(&pipe_ctx);
+        pipe_ctx_user_init(pipe_ctx);
+        pipe_ctx_init(pipe_ctx);
         *pid_p = fork();
 
         if (*pid_p == -1)
         {
                 perror("Failed to fork process");
 
-                handle_pipe_fork_failure(&pipe_ctx);
+                handle_pipe_fork_failure(pipe_ctx);
                 exit(EXIT_FAILURE);
         }
         else if (*pid_p == 0)
         {
 
-                handle_child_pipe_end(&pipe_ctx);
+                handle_child_pipe_end(pipe_ctx);
                 execvp(args[0], args);
                 printf("DEBUG: %s\n", args[0]);
                 perror("Failed to execute process");
                 exit(EXIT_FAILURE);
         }
-        handle_parent_pipe_end(&pipe_ctx);
-        pipe_ctx_exit(&pipe_ctx);
-
+        handle_parent_pipe_end(pipe_ctx);
         return EXIT_SUCCESS;
 }
 
 /**
- * @brief    Text
+ * @brief       Text
  *
- * @return   int
+ * @return      pipe_ctx_t**
  */
-int run_processes(process_cmd_ctx_t processes_cmds_list[PROCESS_COUNT])
+pipe_ctx_t **procs_mgr_alloc_pipes_ctxs()
+{
+        pipe_ctx_t **pipe_ctx_list;
+        pipe_ctx_list = (pipe_ctx_t **)malloc(PROCESS_COUNT * sizeof(pipe_ctx_t));
+        if (pipe_ctx_list == NULL)
+        {
+                perror("NULL POINTER pipe_ctx_list");
+                exit(EXIT_FAILURE);
+        }
+
+        for (int i = 0; i < PROCESS_COUNT; i++)
+        {
+                pipe_ctx_list[i] = (pipe_ctx_t *)malloc(sizeof(pipe_ctx_t));
+                if (pipe_ctx_list[i] == NULL)
+                {
+                        perror("NULL POINTER pipe_ctx_list[i]");
+                        exit(EXIT_FAILURE);
+                }
+        }
+
+        return pipe_ctx_list;
+}
+
+/**
+ * @brief       Text
+ *
+ * @param       pipe_ctx_list   My Param doc
+ */
+void procs_mgr_release_pipes_ctxs(pipe_ctx_t **pipe_ctx_list)
+{
+        for (int i = 0; i < PROCESS_COUNT; i++)
+        {
+                pipe_ctx_exit(pipe_ctx_list[i]);
+                free(pipe_ctx_list[i]);
+        }
+
+        free(pipe_ctx_list);
+}
+
+/**
+ * @brief       Text
+ *
+ * @param       processes_cmds_list My Param doc
+ * @param       pipe_ctx_list   My Param doc
+ * @return      int
+ */
+int procs_mgr_run(process_cmd_ctx_t processes_cmds_list[PROCESS_COUNT], pipe_ctx_t **pipe_ctx_list)
 {
         // TODO: No need in both ret & status
-        int ret = EXIT_SUCCESS;
+        int ret;
         pid_t pids[PROCESS_COUNT];
         int status;
         int i;
@@ -81,9 +119,7 @@ int run_processes(process_cmd_ctx_t processes_cmds_list[PROCESS_COUNT])
         // not necesserally the server launced from same node.
         // Thus, it might not considered as a BUG.
         for (i = 0; i < PROCESS_COUNT; i++)
-        {
-                ret |= fork_process(&(pids[i]), processes_cmds_list[i].cmd_args);
-        }
+                ret |= fork_process(&(pids[i]), processes_cmds_list[i].cmd_args, pipe_ctx_list[i]);
 
         // TODO: Handle 'status' before reusing it.
         for (i = 0; i < PROCESS_COUNT; i++)

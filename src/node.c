@@ -65,17 +65,20 @@ int main(int argc, char **argv)
 {
         input_ctx_t input_ctx;
         processes_ctx_t processes_ctx;
+        pipe_ctx_t **pipe_ctx_list = procs_mgr_alloc_pipes_ctxs();
+
+        // TODO: Manage return values. Also return values of cmd_line_parser module.
+        get_cmds(argc, argv);
         // TODO: Get processes_cmds_list from user cmd line or config_appname.yml file.
         process_cmd_ctx_t processes_cmds_list[PROCESS_COUNT] = {{server_cmd, SERVER_ARG_COUNT},
                                                                 {client_cmd, CLIENT_ARG_COUNT}};
 
-        // TODO: Manage return values. Also return values of cmd_line_parser module.
-        get_cmds(argc, argv);
-
         //  TODO: Consider having CONFIG_FILE_PATH_NODE & CONFIG_FILE_PATH_PROCESSES_MGR recieved as input from user & not from macro.
         yaml_load_file(CONFIG_FILE_PATH_PROCESSES_MGR, &processes_ctx);
         yaml_load_file(CONFIG_FILE_PATH_NODE, &input_ctx);
-        run_processes(processes_cmds_list);
+        // TODO: Place node_interact before procs_mgr_run & enable user ineraction to create processes.
+        procs_mgr_run(processes_cmds_list, pipe_ctx_list);
+        procs_mgr_release_pipes_ctxs(pipe_ctx_list);
         return EXIT_SUCCESS;
 }
 
