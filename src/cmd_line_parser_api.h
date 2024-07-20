@@ -11,6 +11,10 @@
 
 #pragma once
 
+// TODO: Need to be removed from header after their use in node.c main funtion is removed.
+#define SERVER_ARG_COUNT (3)
+#define CLIENT_ARG_COUNT (3)
+
 extern char *server_cmd[];
 extern char *client_cmd[];
 

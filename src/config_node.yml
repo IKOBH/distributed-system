@@ -1,39 +1,68 @@
 # TODO: Add config.yaml & libyaml (or is it libyaml-dev?) to cmake depndencies.
+# TODO: Think of an include\import like mechanism to enable structrured, clean & small hirarchy of config files.
+# For example, I could think of exporting the connection structure to a config_network.yml file.
+# config_network will support all network protocols & will be imported here.
+# Some values might be overwriting using the '<<' syntax.
+# Another example would be an config_IPC.yml which supports all inter-process communication.
+# config_IPC could decide how many pipes to instantiate & at what direction or between which entities.
+# It would laso include shared data structure & will decied it's size etc. Other IPC too...
 
 ---
 # Default config
 
-struct sin_addr: &sin_addr
-- s_addr: INADDR_ANY
+#IPv4 Protocol
+-
+  struct sin_addr: &sin_addr
+  - s_addr: INADDR_ANY
 
-struct sockaddr_in: &address
-- sin_family: "AF_INET"
-- sin_port: 8080
-- sin_addr: *sin_addr
+-
+  struct sockaddr_in: &address
+  - sin_family: "AF_INET"
+  - sin_port: 8080
+  - sin_addr_p: *sin_addr
 
-connection ctx: &connection
-- sockaddr_in: *address
-- send buffer size: 1024 #Bytes
-- recv buffer size: 1024 #Bytes
+-
+  connection_ctx: &connection
+  - sockaddr_in_p: *address
+  - send_buff size: 1024 #Bytes
+  - recv_buff size: 1024 #Bytes
 
-connect retry ctx: &connect_retry
-- retry cnt: 0
-- retry sleep time: 0
+-
+  connect_retry_ctx: &connect_retry
+  - retry_cnt: 0
+  - retry_sleep_time: 0
 
-client ctx: &client
-- executable: "./client"
-- user_args: ""
-- connection ctx: *connection
-- connect retry ctx: *connect_retry
 
-server ctx: &server
-- executable: "./server"
-- user_args: ""
-- connection ctx: *connection
+#Pipe
+-
+  pipe_direction: #Constants (Replaces enums or defines.)
+  - &parent_to_child 0
+  - &child_to_parent 1
 
-node ctx:
-- *client
-- *server
+-
+  pipe_ctx: &pipe
+  - direction_p: *parent_to_child
+
+
+#Node
+-
+  client_ctx: &client
+  - executable: "./client"
+  - user_args: ""
+  - connection_ctx_p: *connection
+  - connect_retry_ctx_p: *connect_retry
+  - pipe_ctx_p: *pipe
+
+-
+  server_ctx: &server
+  - executable: "./server"
+  - user_args: ""
+  - connection_ctx_p: *connection
+
+-
+  node_ctx:
+  - client_ctx_p: *client
+  - server_ctx_p: *server
 
 ---
 # User defined config
