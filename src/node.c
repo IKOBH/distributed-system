@@ -59,6 +59,12 @@ typedef struct node_cmd_ctx_t
         char *cmd_args;
 } node_cmd_ctx_t;
 
+/**
+ * @brief       Text
+ *
+ * @param       input_buff      My Param doc
+ * @return      int
+ */
 static int node_get_input(char *input_buff)
 {
         if (!fgets(input_buff, SEND_BUFFER_BYTE_SIZE, stdin))
@@ -75,6 +81,13 @@ static int node_get_input(char *input_buff)
         return 0;
 }
 
+/**
+ * @brief       Text
+ *
+ * @param       input_buff      My Param doc
+ * @param       cmd             My Param doc
+ * @return      int
+ */
 int node_interpret_input(char *input_buff, node_cmd_ctx_t *cmd)
 {
         // TODO: Implement. (The following is not the actual logic required.)
@@ -82,6 +95,12 @@ int node_interpret_input(char *input_buff, node_cmd_ctx_t *cmd)
         cmd->cmd_args = input_buff;
 }
 
+/**
+ * @brief       Text
+ *
+ * @param       cmd_args        My Param doc
+ * @param       pipe_ctx        My Param doc
+ */
 void node_act_on_client_cmd(char *cmd_args, pipe_ctx_t *pipe_ctx)
 {
         FILE *client_fp;
@@ -103,6 +122,12 @@ void node_act_on_client_cmd(char *cmd_args, pipe_ctx_t *pipe_ctx)
         }
 }
 
+/**
+ * @brief       Text
+ *
+ * @param       cmd             My Param doc
+ * @param       pipe_ctx_list   My Param doc
+ */
 void node_act_on_cmd(node_cmd_ctx_t *cmd, pipe_ctx_t **pipe_ctx_list)
 {
         switch (cmd->cmd)
@@ -117,6 +142,11 @@ void node_act_on_cmd(node_cmd_ctx_t *cmd, pipe_ctx_t **pipe_ctx_list)
         }
 }
 
+/**
+ * @brief       Text
+ *
+ * @param       pipe_ctx_list   My Param doc
+ */
 static void node_interact(pipe_ctx_t **pipe_ctx_list)
 {
         char input_buff[SEND_BUFFER_BYTE_SIZE];
