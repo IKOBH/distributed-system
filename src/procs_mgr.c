@@ -28,7 +28,7 @@ typedef struct input_ctx_t
  * @param    pipe_ctx            My Param doc
  * @return   int
  */
-static int fork_process(pid_t *pid_p, char *const args[], pipe_ctx_t *pipe_ctx)
+static int procs_mgr_fork(pid_t *pid_p, char *const args[], pipe_ctx_t *pipe_ctx)
 {
         // TODO: Add support for multi-piping.
         pipe_ctx_user_init(pipe_ctx);
@@ -119,7 +119,7 @@ int procs_mgr_run(process_cmd_ctx_t processes_cmds_list[PROCESS_COUNT], pipe_ctx
         // not necesserally the server launced from same node.
         // Thus, it might not considered as a BUG.
         for (i = 0; i < PROCESS_COUNT; i++)
-                ret |= fork_process(&(pids[i]), processes_cmds_list[i].cmd_args, pipe_ctx_list[i]);
+                ret |= procs_mgr_fork(&(pids[i]), processes_cmds_list[i].cmd_args, pipe_ctx_list[i]);
 
         // TODO: Handle 'status' before reusing it.
         for (i = 0; i < PROCESS_COUNT; i++)
