@@ -86,7 +86,7 @@ void node_act_on_client_cmd(char *cmd_args, pipe_ctx_t *pipe_ctx)
 {
         FILE *client_fp;
 
-        if ((client_fp = fdopen(pipe_ctx->pipe_fd[1], "w")) == NULL)
+        if ((client_fp = fdopen(pipe_ctx->pipe_fd[E_PIPE_END_WRITE], "w")) == NULL)
         {
                 perror("Failed to open client's pipe");
                 exit(EXIT_FAILURE);
