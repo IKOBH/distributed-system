@@ -17,8 +17,7 @@
 #include "cmd_line_parser_api.h"
 #include "yaml_parser_api.h"
 #include "process_mgr_api.h"
-#include "client_api.h"
-#include "server_api.h"
+#include "networking_api.h"
 
 // TODO: Move handle_error_en & handle_error into some error_handler_api.h file & start using it.
 #define handle_error_en(en, msg)    \
@@ -53,22 +52,6 @@ typedef enum
         E_NODE_CMD_SERVER,
         E_NODE_CMD_COUNT
 } node_cmd_t;
-typedef struct node_ctx_t
-{
-        client_ctx_t *client_ctx;
-        server_ctx_t *server_ctx;
-} node_ctx_t;
-
-typedef struct input_ctx_t
-{
-        node_ctx_t *node_ctx_p;
-        client_ctx_t *client_ctx_p;
-        server_ctx_t *server_ctx_p;
-        connection_ctx_t *connection_ctx_p;
-        struct sockaddr_in *sockaddr_in_p;
-        struct sin_addr *sin_addr_p;
-        connect_retry_ctx_t *connect_retry_ctx_t_p;
-} input_ctx_t;
 
 typedef struct node_cmd_ctx_t
 {
@@ -157,7 +140,6 @@ static void node_interact(pipe_ctx_t **pipe_ctx_list)
  */
 int main(int argc, char **argv)
 {
-        input_ctx_t input_ctx;
         processes_ctx_t processes_ctx;
         pipe_ctx_t **pipe_ctx_list = procs_mgr_alloc_pipes_ctxs();
 
