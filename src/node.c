@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <stdbool.h>
 
 #include "cmd_line_parser_api.h"
 #include "yaml_parser_api.h"
@@ -37,6 +38,21 @@
 
 #define CONFIG_FILE_PATH_NODE ("../src/config_node.yml")
 #define CONFIG_FILE_PATH_PROCESSES_MGR ("../src/config_processes.yml")
+
+typedef enum
+{
+        E_NODE_PROC_IDX_SERVER,
+        E_NODE_PROC_IDX_CLIENT,
+        E_NODE_PROC_IDX_COUNT
+} node_proc_idx_t;
+
+typedef enum
+{
+        // TODO: This list of cmds should be changed & ratified.
+        E_NODE_CMD_CLIENT,
+        E_NODE_CMD_SERVER,
+        E_NODE_CMD_COUNT
+} node_cmd_t;
 typedef struct node_ctx_t
 {
         client_ctx_t *client_ctx;
@@ -54,6 +70,84 @@ typedef struct input_ctx_t
         connect_retry_ctx_t *connect_retry_ctx_t_p;
 } input_ctx_t;
 
+typedef struct node_cmd_ctx_t
+{
+        int cmd;
+        char *cmd_args;
+} node_cmd_ctx_t;
+
+static int node_get_input(char *input_buff)
+{
+        if (!fgets(input_buff, SEND_BUFFER_BYTE_SIZE, stdin))
+        {
+                if (feof(stdin))
+                        printf("End of file reached.\n");
+                else if (ferror(stdin))
+                        perror("Error reading from input");
+                else
+                        perror("Unknown fgets error");
+
+                return -1;
+        }
+        return 0;
+}
+
+int node_interpret_input(char *input_buff, node_cmd_ctx_t *cmd)
+{
+        // TODO: Implement. (The following is not the actual logic required.)
+        cmd->cmd = E_NODE_CMD_CLIENT;
+        cmd->cmd_args = input_buff;
+}
+
+void node_act_on_client_cmd(char *cmd_args, pipe_ctx_t *pipe_ctx)
+{
+        FILE *client_fp;
+
+        if ((client_fp = fdopen(pipe_ctx->pipe_fd[1], "w")) == NULL)
+        {
+                perror("Failed to open client's pipe");
+                exit(EXIT_FAILURE);
+        }
+
+        if (!fputs(cmd_args, client_fp))
+        {
+                if (feof(client_fp))
+                        printf("End of file reached.\n");
+                else if (ferror(client_fp))
+                        perror("Error writing to client");
+                else
+                        perror("Unknown fputs error");
+        }
+}
+
+void node_act_on_cmd(node_cmd_ctx_t *cmd, pipe_ctx_t **pipe_ctx_list)
+{
+        switch (cmd->cmd)
+        {
+        case E_NODE_CMD_CLIENT:
+                node_act_on_client_cmd(cmd->cmd_args, pipe_ctx_list[E_NODE_PROC_IDX_CLIENT]);
+                break;
+
+        default:
+                printf("Failed: Command not found.");
+                break;
+        }
+}
+
+static void node_interact(pipe_ctx_t **pipe_ctx_list)
+{
+        char input_buff[SEND_BUFFER_BYTE_SIZE];
+        node_cmd_ctx_t cmd;
+
+        while (true)
+        {
+                printf("> ");
+                if (node_get_input(input_buff) == -1)
+                        break;
+                node_interpret_input(input_buff, &cmd);
+                node_act_on_cmd(&cmd, pipe_ctx_list);
+        }
+}
 /**
  * @brief    Text
  *
@@ -70,14 +164,15 @@ int main(int argc, char **argv)
         // TODO: Manage return values. Also return values of cmd_line_parser module.
         get_cmds(argc, argv);
         // TODO: Get processes_cmds_list from user cmd line or config_appname.yml file.
-        process_cmd_ctx_t processes_cmds_list[PROCESS_COUNT] = {{server_cmd, SERVER_ARG_COUNT},
-                                                                {client_cmd, CLIENT_ARG_COUNT}};
+        process_cmd_ctx_t processes_cmds_list[E_NODE_PROC_IDX_COUNT] = {{server_cmd, SERVER_ARG_COUNT},
+                                                                        {client_cmd, CLIENT_ARG_COUNT}};
 
         //  TODO: Consider having CONFIG_FILE_PATH_NODE & CONFIG_FILE_PATH_PROCESSES_MGR recieved as input from user & not from macro.
-        yaml_load_file(CONFIG_FILE_PATH_PROCESSES_MGR, &processes_ctx);
-        yaml_load_file(CONFIG_FILE_PATH_NODE, &input_ctx);
+        // yaml_load_file(CONFIG_FILE_PATH_PROCESSES_MGR, &processes_ctx);
+        // yaml_load_file(CONFIG_FILE_PATH_NODE, &input_ctx);
         // TODO: Place node_interact before procs_mgr_run & enable user ineraction to create processes.
         procs_mgr_run(processes_cmds_list, pipe_ctx_list);
+        node_interact(pipe_ctx_list);
         procs_mgr_release_pipes_ctxs(pipe_ctx_list);
         return EXIT_SUCCESS;
 }
