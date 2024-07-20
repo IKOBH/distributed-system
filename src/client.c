@@ -69,15 +69,15 @@ void *spin_recv(void *args)
         char recv_buff[RECV_BUFFER_BYTE_SIZE];
         int bytes_recived = 0;
 
-        printf("Spin Recieve\n");
-        if ((bytes_recived = recv(client_fd, recv_buff, RECV_BUFFER_BYTE_SIZE, 0)) > 0)
-        {
-                printf("Received: %s\n", recv_buff);
-        }
-        else
+        printf("Spin Recieve thread\n");
+        if ((bytes_recived = recv(client_fd, recv_buff, RECV_BUFFER_BYTE_SIZE, 0)) == -1)
         {
                 perror("Failed to receive data");
+                close(client_fd);
+                exit(EXIT_FAILURE);
         }
+
+        printf("Received: %s\n", recv_buff);
 }
 
 /**
@@ -91,10 +91,8 @@ void *spin_send(void *args)
         int client_fd = *(int *)(args);
         char send_buff[SEND_BUFFER_BYTE_SIZE];
 
-        printf("Spin Send\n");
-        strcpy(send_buff, "Hi, I'm a client");
-
-        if (send(client_fd, send_buff, strlen(send_buff) + 1, 0) < 0)
+        printf("Spin Send thread\n");
+        if (send(client_fd, send_buff, strlen(send_buff) + 1, 0) == -1)
         {
                 perror("Failed to send data");
                 close(client_fd);
