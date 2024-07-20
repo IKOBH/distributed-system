@@ -32,12 +32,24 @@ static inline pipe_end_t get_other_pipe_end(pipe_end_t pipe_end)
         return 1 - pipe_end;
 }
 
+static void get_pipe_ctx_from_user(pipe_ctx_t *pipe_ctx)
+{
+        // TODO: Need to use malloc in order to allocate pipe_ctx structure if actually required by user.
+        //       Need also to free it when done.
+        // TODO: Get 'direction' from user config_process file.
+        pipe_ctx->direction = E_PIPE_DIR_PARENT_TO_CHILD;
+}
 /**
  * @brief    Text
  *
  * @param    pipe_ctx            My Param doc
  * @param    state               My Param doc
  */
+
+// TODO: Consider removing all pip APIs that calls 'handle_pipe' & only use 'handle_pipe'.
+//       To do so, I'll have tount on 'state' and increase it each call to 'handle_pipe'.
+//       The trick is to distinguish between parent & child stats after 'E_PIPE_STATE_INITIALIZED'
+//       Since the diverge after the 'fork()' call.
 static void handle_pipe(pipe_ctx_t *pipe_ctx, pipe_state_t state)
 {
         if (!pipe_ctx)
@@ -51,6 +63,11 @@ static void handle_pipe(pipe_ctx_t *pipe_ctx, pipe_state_t state)
 
         switch (state)
         {
+        case E_PIPE_STATE_USER_INITIALIZED:
+
+                get_pipe_ctx_from_user(pipe_ctx);
+                return;
+
         case E_PIPE_STATE_INITIALIZED:
                 if (pipe(pipe_ctx->pipe_fd) == -1)
                 {
@@ -91,14 +108,24 @@ static void handle_pipe(pipe_ctx_t *pipe_ctx, pipe_state_t state)
 }
 
 /**
+ * @brief       Text
+ *
+ * @param       pipe_ctx        My Param doc
+ */
+void pipe_ctx_user_init(pipe_ctx_t *pipe_ctx)
+{
+        handle_pipe(pipe_ctx, E_PIPE_STATE_USER_INITIALIZED);
+}
+
+/**
  * @brief    Text
  *
  * @param    pipe_ctx            My Param doc
  * @param    direction           My Param doc
  */
-void pipe_ctx_init(pipe_ctx_t *pipe_ctx, pipe_direction_t direction)
+// TODO: Rename to 'pipe_init'
+void pipe_ctx_init(pipe_ctx_t *pipe_ctx)
 {
-        pipe_ctx->direction = direction;
         handle_pipe(pipe_ctx, E_PIPE_STATE_INITIALIZED);
 }
 
@@ -147,6 +174,8 @@ void handle_pipe_fork_failure(pipe_ctx_t *pipe_ctx)
  *
  * @param    pipe_ctx            My Param doc
  */
+
+// TODO: Rename to 'pipe_exit'
 void pipe_ctx_exit(pipe_ctx_t *pipe_ctx)
 {
         handle_pipe(pipe_ctx, E_PIPE_STATE_PARENT_DONE);

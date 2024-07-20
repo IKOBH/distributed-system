@@ -14,6 +14,7 @@
 typedef enum
 {
         E_PIPE_STATE_UNINITIALIZED,
+        E_PIPE_STATE_USER_INITIALIZED,
         E_PIPE_STATE_INITIALIZED,
         E_PIPE_STATE_CHILD_READY_TO_USE,
         E_PIPE_STATE_CHILD_DONE,
@@ -21,6 +22,8 @@ typedef enum
         E_PIPE_STATE_PARENT_DONE,
         E_PIPE_STATE_FORK_FAILURE
 } pipe_state_t;
+// TODO: Delete enum after config.yml file is ready.
+//       All user defined constansts should be exported to config.yml.
 typedef enum
 {
         E_PIPE_DIR_PARENT_TO_CHILD, /*Parent write, child reads.*/
@@ -35,12 +38,18 @@ typedef struct pipe_ctx_t
 } pipe_ctx_t;
 
 /**
+ * @brief       Text
+ *
+ * @param       pipe_ctx        My Param doc
+ */
+void pipe_ctx_user_init(pipe_ctx_t *pipe_ctx);
+
+/**
  * @brief    Text
  *
  * @param    pipe_ctx            My Param doc
- * @param    direction           My Param doc
  */
-void pipe_ctx_init(pipe_ctx_t *pipe_ctx, pipe_direction_t direction);
+void pipe_ctx_init(pipe_ctx_t *pipe_ctx);
 
 /**
  * @brief    Text
