@@ -15,12 +15,6 @@
 #include <stdbool.h>
 #include "pipe_utils_api.h"
 
-typedef enum
-{
-        E_PIPE_END_READ,
-        E_PIPE_END_WRITE
-} pipe_end_t;
-
 /**
  * @brief    Get the other pipe end objectText
  *
@@ -46,7 +40,7 @@ static void get_pipe_ctx_from_user(pipe_ctx_t *pipe_ctx)
  * @param    state               My Param doc
  */
 
-// TODO: Consider removing all pip APIs that calls 'handle_pipe' & only use 'handle_pipe'.
+// TODO: Consider removing all pipe APIs that calls 'handle_pipe' & only use 'handle_pipe'.
 //       To do so, I'll have tount on 'state' and increase it each call to 'handle_pipe'.
 //       The trick is to distinguish between parent & child stats after 'E_PIPE_STATE_INITIALIZED'
 //       Since the diverge after the 'fork()' call.
@@ -84,6 +78,7 @@ static void handle_pipe(pipe_ctx_t *pipe_ctx, pipe_state_t state)
         case E_PIPE_STATE_CHILD_READY_TO_USE:
                 pipe_end = direction ? E_PIPE_END_READ : E_PIPE_END_WRITE;
                 other_pipe_end = get_other_pipe_end(pipe_end);
+                // TODO: Do I really need to use STDIN_FILENO or maybe it's better to use another fd?
                 if (dup2(pipe_fd[other_pipe_end], STDIN_FILENO) == -1)
                 {
                         perror("Failed to duplicate read-end of pipe to STDIN");

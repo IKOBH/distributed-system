@@ -24,6 +24,14 @@ typedef enum
 } pipe_state_t;
 // TODO: Delete enum after config.yml file is ready.
 //       All user defined constansts should be exported to config.yml.
+//       On second thougt - enums are compiled time constants & yml is not.
+//       Need to rethink it.
+typedef enum
+{
+        E_PIPE_END_READ,
+        E_PIPE_END_WRITE
+} pipe_end_t;
+
 typedef enum
 {
         E_PIPE_DIR_PARENT_TO_CHILD, /*Parent write, child reads.*/
