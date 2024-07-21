@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <sys/wait.h>
 
-#include "process_mgr_api.h"
+#include "procs_mgr_api.h"
 
 typedef struct input_ctx_t
 {
