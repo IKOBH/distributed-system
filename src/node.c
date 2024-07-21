@@ -59,15 +59,24 @@ typedef struct node_cmd_ctx_t
         char *cmd_args;
 } node_cmd_ctx_t;
 
+typedef struct node_interaction_ctx_t
+{
+        char *input_buff;
+        node_cmd_ctx_t *node_cmd_ctx;
+        pipe_ctx_t **pipe_ctx_list;
+} node_interaction_ctx_t;
+
 /**
  * @brief       Text
  *
- * @param       input_buff      My Param doc
+ * @param       node_interaction_ctx My Param doc
  * @return      int
  */
-static int node_get_input(char *input_buff)
+static int node_get_input(node_interaction_ctx_t *node_interaction_ctx)
 {
-        if (!fgets(input_buff, SEND_BUFFER_BYTE_SIZE, stdin))
+        int ret = 0;
+
+        if (!fgets(node_interaction_ctx->input_buff, SEND_BUFFER_BYTE_SIZE, stdin))
         {
                 if (feof(stdin))
                         printf("End of file reached.\n");
@@ -76,43 +85,51 @@ static int node_get_input(char *input_buff)
                 else
                         perror("Unknown fgets error");
 
-                return -1;
+                node_interaction_ctx->input_buff = NULL;
+                ret = -1;
         }
-        return 0;
+
+        return ret;
 }
 
 /**
  * @brief       Text
  *
- * @param       input_buff      My Param doc
- * @param       cmd             My Param doc
+ * @param       node_interaction_ctx My Param doc
  * @return      int
  */
-int node_interpret_input(char *input_buff, node_cmd_ctx_t *cmd)
+int node_interpret_input(node_interaction_ctx_t *node_interaction_ctx)
 {
+        int ret = 0;
+
+        if (node_interaction_ctx->input_buff == NULL)
+                return -1;
         // TODO: Implement. (The following is not the actual logic required.)
-        cmd->cmd = E_NODE_CMD_CLIENT;
-        cmd->cmd_args = input_buff;
+        node_interaction_ctx->node_cmd_ctx->cmd = E_NODE_CMD_CLIENT;
+        node_interaction_ctx->node_cmd_ctx->cmd_args = node_interaction_ctx->input_buff;
+
+        return ret;
 }
 
 /**
  * @brief       Text
  *
- * @param       cmd_args        My Param doc
- * @param       pipe_ctx        My Param doc
+ * @param       node_interaction_ctx My Param doc
+ * @return      int
  */
-void node_act_on_client_cmd(char *cmd_args, pipe_ctx_t *pipe_ctx)
+int node_act_on_client_cmd(node_interaction_ctx_t *node_interaction_ctx)
 {
+        int ret = 0;
         FILE *client_fp;
-        pipe_end_t pipe_end = pipe_ctx->direction ? E_PIPE_END_READ : E_PIPE_END_WRITE;
+        pipe_end_t pipe_end = node_interaction_ctx->pipe_ctx_list[E_NODE_PROC_IDX_CLIENT]->direction ? E_PIPE_END_READ : E_PIPE_END_WRITE;
 
-        if ((client_fp = fdopen(pipe_ctx->pipe_fd[pipe_end], "w")) == NULL)
+        if ((client_fp = fdopen(node_interaction_ctx->pipe_ctx_list[E_NODE_PROC_IDX_CLIENT]->pipe_fd[pipe_end], "w")) == NULL)
         {
                 perror("Failed to open client's pipe");
                 exit(EXIT_FAILURE);
         }
 
-        if (!fputs(cmd_args, client_fp))
+        if (!fputs(node_interaction_ctx->node_cmd_ctx->cmd_args, client_fp))
         {
                 if (feof(client_fp))
                         printf("End of file reached.\n");
@@ -120,47 +137,93 @@ void node_act_on_client_cmd(char *cmd_args, pipe_ctx_t *pipe_ctx)
                         perror("Error writing to client");
                 else
                         perror("Unknown fputs error");
+
+                ret = -1;
         }
+
+        return ret;
 }
 
 /**
  * @brief       Text
  *
- * @param       cmd             My Param doc
- * @param       pipe_ctx_list   My Param doc
+ * @param       node_interaction_ctx My Param doc
+ * @return      int
  */
-void node_act_on_cmd(node_cmd_ctx_t *cmd, pipe_ctx_t **pipe_ctx_list)
+int node_act_on_cmd(node_interaction_ctx_t *node_interaction_ctx)
 {
-        switch (cmd->cmd)
+        int ret = 0;
+
+        if (node_interaction_ctx->input_buff == NULL)
+                return -1;
+
+        switch (node_interaction_ctx->node_cmd_ctx->cmd)
         {
         case E_NODE_CMD_CLIENT:
-                node_act_on_client_cmd(cmd->cmd_args, pipe_ctx_list[E_NODE_PROC_IDX_CLIENT]);
+                ret |= node_act_on_client_cmd(node_interaction_ctx);
                 break;
 
         default:
                 printf("Failed: Command not found.");
                 break;
         }
+
+        return ret;
 }
 
 /**
  * @brief       Text
  *
- * @param       pipe_ctx_list   My Param doc
+ * @param       node_interaction_ctx My Param doc
+ * @return      int
  */
-static void node_interact(pipe_ctx_t **pipe_ctx_list)
+static int node_interact(node_interaction_ctx_t *node_interaction_ctx)
 {
-        char input_buff[SEND_BUFFER_BYTE_SIZE];
-        node_cmd_ctx_t cmd;
+        int ret = 0;
 
         while (true)
         {
                 printf("> ");
-                if (node_get_input(input_buff) == -1)
+                ret |= node_get_input(node_interaction_ctx);
+                ret |= node_interpret_input(node_interaction_ctx);
+                ret |= node_act_on_cmd(node_interaction_ctx);
+
+                if (ret)
                         break;
-                node_interpret_input(input_buff, &cmd);
-                node_act_on_cmd(&cmd, pipe_ctx_list);
         }
+
+        return ret;
+}
+
+/**
+ * @brief       Text
+ *
+ * @return      node_interaction_ctx_t*
+ */
+node_interaction_ctx_t *node_alloc_interaction_ctx()
+{
+        node_interaction_ctx_t *node_interaction_ctx;
+
+        node_interaction_ctx = (node_interaction_ctx_t *)malloc(sizeof(node_interaction_ctx_t));
+        node_interaction_ctx->input_buff = (char *)malloc(SEND_BUFFER_BYTE_SIZE * sizeof(char));
+        node_interaction_ctx->node_cmd_ctx = (node_cmd_ctx_t *)(malloc(sizeof(node_cmd_ctx_t)));
+        node_interaction_ctx->pipe_ctx_list = procs_mgr_alloc_pipes_ctxs();
+
+        return node_interaction_ctx;
+}
+
+/**
+ * @brief       Text
+ *
+ * @param       node_interaction_ctx My Param doc
+ */
+void node_release_interaction_ctx(node_interaction_ctx_t *node_interaction_ctx)
+{
+
+        procs_mgr_release_pipes_ctxs(node_interaction_ctx->pipe_ctx_list);
+        free(node_interaction_ctx->node_cmd_ctx);
+        free(node_interaction_ctx->input_buff);
+        free(node_interaction_ctx);
 }
 
 /**
@@ -173,7 +236,7 @@ static void node_interact(pipe_ctx_t **pipe_ctx_list)
 int main(int argc, char **argv)
 {
         processes_ctx_t processes_ctx;
-        pipe_ctx_t **pipe_ctx_list = procs_mgr_alloc_pipes_ctxs();
+        node_interaction_ctx_t *node_interaction_ctx = node_alloc_interaction_ctx();
 
         // TODO: Manage return values. Also return values of cmd_line_parser module.
         get_cmds(argc, argv);
@@ -185,9 +248,9 @@ int main(int argc, char **argv)
         // yaml_load_file(CONFIG_FILE_PATH_PROCESSES_MGR, &processes_ctx);
         // yaml_load_file(CONFIG_FILE_PATH_NODE, &input_ctx);
         // TODO: Place node_interact before procs_mgr_run & enable user ineraction to create processes.
-        procs_mgr_run(processes_cmds_list, pipe_ctx_list);
-        node_interact(pipe_ctx_list);
-        procs_mgr_release_pipes_ctxs(pipe_ctx_list);
+        procs_mgr_run(processes_cmds_list, node_interaction_ctx->pipe_ctx_list);
+        node_interact(node_interaction_ctx);
+        node_release_interaction_ctx(node_interaction_ctx);
         return EXIT_SUCCESS;
 }
 
