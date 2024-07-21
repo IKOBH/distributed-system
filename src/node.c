@@ -85,8 +85,9 @@ int node_interpret_input(char *input_buff, node_cmd_ctx_t *cmd)
 void node_act_on_client_cmd(char *cmd_args, pipe_ctx_t *pipe_ctx)
 {
         FILE *client_fp;
+        pipe_end_t pipe_end = pipe_ctx->direction ? E_PIPE_END_READ : E_PIPE_END_WRITE;
 
-        if ((client_fp = fdopen(pipe_ctx->pipe_fd[E_PIPE_END_WRITE], "w")) == NULL)
+        if ((client_fp = fdopen(pipe_ctx->pipe_fd[pipe_end], "w")) == NULL)
         {
                 perror("Failed to open client's pipe");
                 exit(EXIT_FAILURE);
@@ -131,6 +132,7 @@ static void node_interact(pipe_ctx_t **pipe_ctx_list)
                 node_act_on_cmd(&cmd, pipe_ctx_list);
         }
 }
+
 /**
  * @brief    Text
  *
