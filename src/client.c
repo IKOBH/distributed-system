@@ -19,10 +19,12 @@
 
 void connection_ctx_init()
 {
+        // TODO: Implement
 }
 
 void connect_retry_ctx_init(connect_retry_ctx_t *retry_ctx)
 {
+        // TODO: Implement
 }
 
 void client_ctx_init(client_ctx_t *client_ctx)
@@ -40,7 +42,7 @@ void client_ctx_init(client_ctx_t *client_ctx)
  * @param    address             server address.
  * @param    addrlen             sizeof address struct.
  */
-void client_retry_connect(int retries, int client_fd, struct sockaddr_in *address, unsigned int addrlen)
+static void client_retry_connect(int retries, int client_fd, struct sockaddr_in *address, unsigned int addrlen)
 {
         int attempt_cnt = 0;
         do
@@ -63,7 +65,7 @@ void client_retry_connect(int retries, int client_fd, struct sockaddr_in *addres
  * @param    args                My Param doc
  * @return   void*
  */
-void *client_recv(void *args)
+static void *client_recv(void *args)
 {
         int client_fd = *(int *)(args);
         char recv_buff[RECV_BUFFER_BYTE_SIZE];
@@ -86,7 +88,7 @@ void *client_recv(void *args)
  * @param    args                My Param doc
  * @return   void*
  */
-void *client_send(void *args)
+static void *client_send(void *args)
 {
         int client_fd = *(int *)(args);
         char send_buff[SEND_BUFFER_BYTE_SIZE];
@@ -104,7 +106,7 @@ void *client_send(void *args)
  * @brief    Text
  *
  */
-void client_run()
+static void client_run()
 {
         int client_fd;
         struct sockaddr_in address;
