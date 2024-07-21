@@ -16,7 +16,7 @@
 
 #include "cmd_line_parser_api.h"
 #include "yaml_parser_api.h"
-#include "process_mgr_api.h"
+#include "procs_mgr_api.h"
 #include "networking_api.h"
 
 // TODO: Move handle_error_en & handle_error into some error_handler_api.h file & start using it.

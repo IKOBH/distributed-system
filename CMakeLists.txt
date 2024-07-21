@@ -16,8 +16,8 @@ add_executable(node
         src/yaml_parser_api.h
         src/str_utils.c
         src/str_utils_api.h
-        src/process_mgr.c
-        src/process_mgr_api.h
+        src/procs_mgr.c
+        src/procs_mgr_api.h
         src/pipe_utils.c
         src/pipe_utils_api.h
         src/node.c)
