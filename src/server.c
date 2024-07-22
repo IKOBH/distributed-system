@@ -15,10 +15,9 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
+#include "server_api.h"
+
 #define PORT (8080)
-#define ECHO ("ECHO:")
-#define SEND_BUFFER_BYTE_SIZE (1024 + strlen(ECHO))
-#define RECV_BUFFER_BYTE_SIZE (1024)
 
 /**
  * @brief    Text
@@ -30,8 +29,8 @@ void run_server()
         struct sockaddr_in address;
         int opt = 1;
         unsigned int addrlen = sizeof(address);
-        char send_buff[SEND_BUFFER_BYTE_SIZE];
-        char recv_buff[RECV_BUFFER_BYTE_SIZE];
+        char send_buff[OUTPUT_BUFFER_BYTE_SIZE];
+        char recv_buff[INPUT_BUFFER_BYTE_SIZE];
         int bytes_recived = 0;
 
         printf("Server process created\n");
@@ -53,14 +52,14 @@ void run_server()
         address.sin_addr.s_addr = INADDR_ANY;
         address.sin_port = htons(PORT);
 
-        if (bind(server_fd, (struct sockaddr *)&address, addrlen) < 0)
+        if (bind(server_fd, (struct sockaddr *)&address, addrlen) == -1)
         {
                 perror("Failed to bind socket to address");
                 close(server_fd);
                 exit(EXIT_FAILURE);
         }
 
-        if (listen(server_fd, 10) < 0)
+        if (listen(server_fd, 10) == -1)
         {
                 perror("Failed to listen");
                 close(server_fd);
@@ -70,7 +69,7 @@ void run_server()
         printf("Server is listening on port %d\n", PORT);
 
         // TODO: Support more than one client by accepting more connections.(loop accept.)
-        if ((request_fd = accept(server_fd, (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0)
+        if ((request_fd = accept(server_fd, (struct sockaddr *)&address, (socklen_t *)&addrlen)) == -1)
         {
                 perror("Failed to accept connection");
                 close(server_fd);
@@ -79,15 +78,15 @@ void run_server()
 
         printf("Connection accepted\n");
 
-        if ((bytes_recived = recv(request_fd, recv_buff, RECV_BUFFER_BYTE_SIZE, 0)) > 0)
+        if ((bytes_recived = recv(request_fd, recv_buff, INPUT_BUFFER_BYTE_SIZE, 0)) == -1)
         {
-                printf("Received: %s\n", recv_buff);
-                sprintf(send_buff, "%s %s", ECHO, recv_buff);
-                send(request_fd, send_buff, strlen(send_buff) + 1, 0);
+                perror("Failed to receive data");
         }
         else
         {
-                perror("Failed to receive data");
+                printf("Received: %s\n", recv_buff);
+                sprintf(send_buff, "%s", recv_buff);
+                send(request_fd, send_buff, strlen(send_buff) + 1, 0);
         }
 
         close(request_fd);

@@ -13,11 +13,13 @@
 
 #include <arpa/inet.h>
 
+#include "communication_utils_api.h"
+
 #define IP ("127.0.0.1")
 #define PORT (8080)
 // TODO: Support varaiable length for both send & rsc buffers.
-#define SEND_BUFFER_BYTE_SIZE (1024)
-#define RECV_BUFFER_BYTE_SIZE (1024)
+#define OUTPUT_BUFFER_BYTE_SIZE (1024)
+#define INPUT_BUFFER_BYTE_SIZE (1024)
 
 typedef struct connection_ctx_t
 {
@@ -29,7 +31,18 @@ typedef struct connection_ctx_t
         // TODO: Switch to static allocated pointer (char ip[16]) or using string API.
         char *ip;
         // TODO: Switch to dynamic allocated pointer (char *send_buff)
-        char send_buff[SEND_BUFFER_BYTE_SIZE];
+        char send_buff[OUTPUT_BUFFER_BYTE_SIZE];
         // TODO: Switch to dynamic allocated pointer (char *send_buff)
-        char recv_buff[RECV_BUFFER_BYTE_SIZE];
-} connection_ctx_t;
+        char recv_buff[INPUT_BUFFER_BYTE_SIZE];
+} conn_ctx_t;
+
+typedef struct network_ctx_t
+{
+        // TODO: Implement.
+} net_ctx_t;
+
+typedef struct network_channel_t
+{
+        comm_chan_t *net_chan;
+        net_ctx_t *net_ctx;
+} net_chan_t;

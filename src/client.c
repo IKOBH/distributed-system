@@ -22,7 +22,7 @@ void connection_ctx_init()
         // TODO: Implement
 }
 
-void connect_retry_ctx_init(connect_retry_ctx_t *retry_ctx)
+void connect_retry_ctx_init(client_conn_retry_ctx_t *retry_ctx)
 {
         // TODO: Implement
 }
@@ -68,11 +68,11 @@ static void client_retry_connect(int retries, int client_fd, struct sockaddr_in 
 static void *client_recv(void *args)
 {
         int client_fd = *(int *)(args);
-        char recv_buff[RECV_BUFFER_BYTE_SIZE];
+        char recv_buff[INPUT_BUFFER_BYTE_SIZE];
         int bytes_recived = 0;
 
         printf("Spin Recieve thread\n");
-        if ((bytes_recived = recv(client_fd, recv_buff, RECV_BUFFER_BYTE_SIZE, 0)) == -1)
+        if ((bytes_recived = recv(client_fd, recv_buff, INPUT_BUFFER_BYTE_SIZE, 0)) == -1)
         {
                 perror("Failed to receive data");
                 close(client_fd);
@@ -91,7 +91,7 @@ static void *client_recv(void *args)
 static void *client_send(void *args)
 {
         int client_fd = *(int *)(args);
-        char send_buff[SEND_BUFFER_BYTE_SIZE];
+        char send_buff[OUTPUT_BUFFER_BYTE_SIZE];
 
         printf("Spin Send thread\n");
         if (send(client_fd, send_buff, strlen(send_buff) + 1, 0) == -1)

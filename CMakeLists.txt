@@ -10,6 +10,8 @@ include_directories(${YAML_INCLUDE_DIRS})
 
 add_executable(node 
         src/networking_api.h
+        src/communication_utils.c
+        src/communication_utils_api.h
         src/cmd_line_parser.c
         src/cmd_line_parser_api.h
         src/yaml_parser.c

@@ -18,6 +18,7 @@
 #include "yaml_parser_api.h"
 #include "procs_mgr_api.h"
 #include "networking_api.h"
+#include "communication_utils_api.h"
 
 // TODO: Move handle_error_en & handle_error into some error_handler_api.h file & start using it.
 #define handle_error_en(en, msg)    \
@@ -35,6 +36,7 @@
                 exit(EXIT_FAILURE); \
         } while (0)
 
+#define INVALID_FD (-1)
 #define CONFIG_FILE_PATH_NODE ("../src/config_node.yml")
 #define CONFIG_FILE_PATH_PROCESSES_MGR ("../src/config_processes.yml")
 
@@ -48,23 +50,32 @@ typedef enum
 typedef enum
 {
         // TODO: This list of cmds should be changed & ratified.
-        E_NODE_CMD_CLIENT,
+        E_NODE_CMD_TO_CLIENT,
         E_NODE_CMD_SERVER,
         E_NODE_CMD_COUNT
 } node_cmd_t;
 
+// communication_interface_t node_interaction_interface = {
+//     .interact_loop = node_interact,
+//     .get_input = comm_get_input,
+//     .interpret_input = node_interpret_input,
+//     .act_on_cmd = node_act_on_cmd};
 typedef struct node_cmd_ctx_t
 {
         int cmd;
         char *cmd_args;
 } node_cmd_ctx_t;
 
-typedef struct node_interaction_ctx_t
+typedef struct node_communication_ctx_t
 {
+        // TODO: Make use of 'comm_chan_t' pointer.
+        chan_t channel;
+        int input_fd;
+        FILE *input_stream;
         char *input_buff;
         node_cmd_ctx_t *node_cmd_ctx;
         pipe_ctx_t **pipe_ctx_list;
-} node_interaction_ctx_t;
+} node_comm_ctx_t;
 
 /**
  * @brief       Text
@@ -72,41 +83,15 @@ typedef struct node_interaction_ctx_t
  * @param       node_interaction_ctx My Param doc
  * @return      int
  */
-static int node_get_input(node_interaction_ctx_t *node_interaction_ctx)
+int node_interpret_input(comm_chan_ctx_t *comm_chan_ctx)
 {
         int ret = 0;
 
-        if (!fgets(node_interaction_ctx->input_buff, SEND_BUFFER_BYTE_SIZE, stdin))
-        {
-                if (feof(stdin))
-                        printf("End of file reached.\n");
-                else if (ferror(stdin))
-                        perror("Error reading from input");
-                else
-                        perror("Unknown fgets error");
-
-                node_interaction_ctx->input_buff = NULL;
-                ret = -1;
-        }
-
-        return ret;
-}
-
-/**
- * @brief       Text
- *
- * @param       node_interaction_ctx My Param doc
- * @return      int
- */
-int node_interpret_input(node_interaction_ctx_t *node_interaction_ctx)
-{
-        int ret = 0;
-
-        if (node_interaction_ctx->input_buff == NULL)
+        if (comm_chan_ctx->comm_chan->buffer == NULL)
                 return -1;
         // TODO: Implement. (The following is not the actual logic required.)
-        node_interaction_ctx->node_cmd_ctx->cmd = E_NODE_CMD_CLIENT;
-        node_interaction_ctx->node_cmd_ctx->cmd_args = node_interaction_ctx->input_buff;
+        comm_chan_ctx->comm_cmd->cmd = E_NODE_CMD_TO_CLIENT;
+        comm_chan_ctx->comm_cmd->cmd_args = comm_chan_ctx->comm_chan->buffer;
 
         return ret;
 }
@@ -117,19 +102,20 @@ int node_interpret_input(node_interaction_ctx_t *node_interaction_ctx)
  * @param       node_interaction_ctx My Param doc
  * @return      int
  */
-int node_act_on_client_cmd(node_interaction_ctx_t *node_interaction_ctx)
+static int node_send_to_client_cmd(comm_chan_ctx_t *comm_chan_ctx)
 {
         int ret = 0;
         FILE *client_fp;
-        pipe_end_t pipe_end = node_interaction_ctx->pipe_ctx_list[E_NODE_PROC_IDX_CLIENT]->direction ? E_PIPE_END_READ : E_PIPE_END_WRITE;
+        pipe_ctx_t **pipe_ctx_list_p = (pipe_ctx_t **)comm_chan_ctx->chan_specific_ctx;
+        pipe_end_t pipe_end = pipe_ctx_list_p[E_NODE_PROC_IDX_CLIENT]->direction ? E_PIPE_END_READ : E_PIPE_END_WRITE;
 
-        if ((client_fp = fdopen(node_interaction_ctx->pipe_ctx_list[E_NODE_PROC_IDX_CLIENT]->pipe_fd[pipe_end], "w")) == NULL)
+        if ((client_fp = fdopen(pipe_ctx_list_p[E_NODE_PROC_IDX_CLIENT]->pipe_fd[pipe_end], "w")) == NULL)
         {
                 perror("Failed to open client's pipe");
                 exit(EXIT_FAILURE);
         }
 
-        if (!fputs(node_interaction_ctx->node_cmd_ctx->cmd_args, client_fp))
+        if (!fputs(comm_chan_ctx->comm_cmd->cmd_args, client_fp))
         {
                 if (feof(client_fp))
                         printf("End of file reached.\n");
@@ -150,17 +136,17 @@ int node_act_on_client_cmd(node_interaction_ctx_t *node_interaction_ctx)
  * @param       node_interaction_ctx My Param doc
  * @return      int
  */
-int node_act_on_cmd(node_interaction_ctx_t *node_interaction_ctx)
+int node_act_on_cmd(comm_chan_ctx_t *comm_chan_ctx)
 {
         int ret = 0;
 
-        if (node_interaction_ctx->input_buff == NULL)
+        if (comm_chan_ctx->comm_chan->buffer == NULL)
                 return -1;
 
-        switch (node_interaction_ctx->node_cmd_ctx->cmd)
+        switch (comm_chan_ctx->comm_cmd->cmd)
         {
-        case E_NODE_CMD_CLIENT:
-                ret |= node_act_on_client_cmd(node_interaction_ctx);
+        case E_NODE_CMD_TO_CLIENT:
+                ret |= node_send_to_client_cmd(comm_chan_ctx);
                 break;
 
         default:
@@ -169,61 +155,6 @@ int node_act_on_cmd(node_interaction_ctx_t *node_interaction_ctx)
         }
 
         return ret;
-}
-
-/**
- * @brief       Text
- *
- * @param       node_interaction_ctx My Param doc
- * @return      int
- */
-static int node_interact(node_interaction_ctx_t *node_interaction_ctx)
-{
-        int ret = 0;
-
-        while (true)
-        {
-                printf("> ");
-                ret |= node_get_input(node_interaction_ctx);
-                ret |= node_interpret_input(node_interaction_ctx);
-                ret |= node_act_on_cmd(node_interaction_ctx);
-
-                if (ret)
-                        break;
-        }
-
-        return ret;
-}
-
-/**
- * @brief       Text
- *
- * @return      node_interaction_ctx_t*
- */
-node_interaction_ctx_t *node_alloc_interaction_ctx()
-{
-        node_interaction_ctx_t *node_interaction_ctx;
-
-        node_interaction_ctx = (node_interaction_ctx_t *)malloc(sizeof(node_interaction_ctx_t));
-        node_interaction_ctx->input_buff = (char *)malloc(SEND_BUFFER_BYTE_SIZE * sizeof(char));
-        node_interaction_ctx->node_cmd_ctx = (node_cmd_ctx_t *)(malloc(sizeof(node_cmd_ctx_t)));
-        node_interaction_ctx->pipe_ctx_list = procs_mgr_alloc_pipes_ctxs();
-
-        return node_interaction_ctx;
-}
-
-/**
- * @brief       Text
- *
- * @param       node_interaction_ctx My Param doc
- */
-void node_release_interaction_ctx(node_interaction_ctx_t *node_interaction_ctx)
-{
-
-        procs_mgr_release_pipes_ctxs(node_interaction_ctx->pipe_ctx_list);
-        free(node_interaction_ctx->node_cmd_ctx);
-        free(node_interaction_ctx->input_buff);
-        free(node_interaction_ctx);
 }
 
 /**
@@ -236,21 +167,31 @@ void node_release_interaction_ctx(node_interaction_ctx_t *node_interaction_ctx)
 int main(int argc, char **argv)
 {
         processes_ctx_t processes_ctx;
-        node_interaction_ctx_t *node_interaction_ctx = node_alloc_interaction_ctx();
+        // interaction_t node_interaction;
+        comm_chan_ctx_t *user_to_node_comm_ctx = comm_alloc_ctx(E_CHANNEL_PIPE, INPUT_BUFFER_BYTE_SIZE);
+        comm_chan_ctx_t *node_to_client_comm_ctx = comm_alloc_ctx(E_CHANNEL_PIPE, OUTPUT_BUFFER_BYTE_SIZE);
+        comm_init_ctx(user_to_node_comm_ctx, stdin);
+        comm_init_ctx(node_to_client_comm_ctx, stdin);
+        comm_if_t comm_if;
+        comm_if.comm_if_interpret_input = node_interpret_input;
+        comm_if.comm_if_act_on_cmd = node_act_on_cmd;
 
         // TODO: Manage return values. Also return values of cmd_line_parser module.
         get_cmds(argc, argv);
-        // TODO: Get processes_cmds_list from user cmd line or config_appname.yml file.
-        process_cmd_ctx_t processes_cmds_list[E_NODE_PROC_IDX_COUNT] = {{server_cmd, SERVER_ARG_COUNT},
-                                                                        {client_cmd, CLIENT_ARG_COUNT}};
+        // TODO: Get procs_cmds_list from user cmd line or config_appname.yml file.
+        process_cmd_ctx_t procs_cmds_list[E_NODE_PROC_IDX_COUNT] = {{server_cmd, SERVER_ARG_COUNT},
+                                                                    {client_cmd, CLIENT_ARG_COUNT}};
 
         //  TODO: Consider having CONFIG_FILE_PATH_NODE & CONFIG_FILE_PATH_PROCESSES_MGR recieved as input from user & not from macro.
         // yaml_load_file(CONFIG_FILE_PATH_PROCESSES_MGR, &processes_ctx);
         // yaml_load_file(CONFIG_FILE_PATH_NODE, &input_ctx);
-        // TODO: Place node_interact before procs_mgr_run & enable user ineraction to create processes.
-        procs_mgr_run(processes_cmds_list, node_interaction_ctx->pipe_ctx_list);
-        node_interact(node_interaction_ctx);
-        node_release_interaction_ctx(node_interaction_ctx);
+        // TODO: Place comm_interact before procs_mgr_run & enable user ineraction to create processes.
+        procs_mgr_run(procs_cmds_list, user_to_node_comm_ctx->chan_specific_ctx);
+        comm_interact(&comm_if, user_to_node_comm_ctx);
+        // init(node_interaction);
+        // interact(&node_interaction);
+        comm_release_ctx(node_to_client_comm_ctx);
+        comm_release_ctx(user_to_node_comm_ctx);
         return EXIT_SUCCESS;
 }
 
