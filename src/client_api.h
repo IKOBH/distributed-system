@@ -17,16 +17,16 @@
 #define CONNECT_SLEEP_GAP_US (50)
 #define CONNECT_RETRIES (5)
 
-typedef struct connect_retry_ctx_t
+typedef struct client_connection_retry_ctx_t
 {
         int retry_cnt;
         int retry_sleep_time;
-} connect_retry_ctx_t;
+} client_conn_retry_ctx_t;
 
 typedef struct client_ctx_t
 {
-        connection_ctx_t *connection_ctx;
-        connect_retry_ctx_t *retry_ctx;
+        conn_ctx_t *connection_ctx;
+        client_conn_retry_ctx_t *retry_ctx;
         // TODO: Handle 'user_args' recieved from cmd line & corresponds to client_args_t after parser refactor.
         char *user_args;
 

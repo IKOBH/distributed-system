@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "communication_utils_api.h"
+
 typedef enum
 {
         E_PIPE_STATE_UNINITIALIZED,
@@ -44,6 +46,12 @@ typedef struct pipe_ctx_t
         pipe_state_t state;
         pipe_direction_t direction;
 } pipe_ctx_t;
+
+typedef struct pipe_channel_t
+{
+        comm_chan_t *pipe_chan;
+        pipe_ctx_t *pipe_ctx;
+} pipe_chan_t;
 
 /**
  * @brief       Text
