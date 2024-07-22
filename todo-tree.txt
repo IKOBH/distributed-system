@@ -1,6 +1,8 @@
 └─ distributed_system
    ├─ client.c
-   │  └─ line 135: TODO : Check return values.
+   │  ├─ line 22: TODO : Implement
+   │  ├─ line 27: TODO : Implement
+   │  └─ line 137: TODO : Check return values.
    ├─ client_api.h
    │  ├─ line 16: TODO : These values should be user-defined & defaulted to config_node.yml or config_client.yml
    │  └─ line 30: TODO : Handle 'user_args' recieved from cmd line & corresponds to client_args_t after parser refactor.
@@ -8,72 +10,63 @@
    │  └─ line 75: TODO : Implement.
    ├─ cmd_line_parser_api.h
    │  └─ line 14: TODO : Need to be removed from header after their use in node.c main funtion is removed.
+   ├─ communication_utils.c
+   │  ├─ line 125: NOTE : Calls to this function may be rplaced with just using 'free()'.
+   │  ├─ line 149: TODO : might need to export comm_cmd allocation to a seperate func, depends on comm_chan_ctx_t fields.
+   │  └─ line 151: TODO : Move the 'procs_mgr_alloc_pipes_ctxs' call to 'comm_utils_wrapper.h' with all other outer API calls.
    ├─ config_node.yml
    │  ├─ line 1: TODO : Add config.yaml & libyaml (or is it libyaml-dev?) to cmake depndencies.
    │  ├─ line 2: TODO : Think of an include\import like mechanism to enable structrured, clean & small hirarchy of config files.
-   │  ├─ line 40: TODO : Enable user define their own config.
-   │  ├─ line 42: TODO : Support multi-user\multi-app configurations.
-   │  ├─ line 45: TODO : Consider genertae user configs as seperate yaml files (e.g. yaml.user)
-   │  ├─ line 52: TODO : Auto-Generate the *full* runtime configuration used,
-   │  ├─ line 55: TODO : Consider genertae runtime config as a seperate tmp file (e.g. yaml.runtime)
    │  ├─ line 69: TODO : Enable user define their own config.
    │  ├─ line 71: TODO : Support multi-user\multi-app configurations.
    │  ├─ line 74: TODO : Consider genertae user configs as seperate yaml files (e.g. yaml.user)
    │  ├─ line 81: TODO : Auto-Generate the *full* runtime configuration used,
    │  └─ line 84: TODO : Consider genertae runtime config as a seperate tmp file (e.g. yaml.runtime)
+   ├─ interaction_utils.c
+   │  ├─ line 123: NOTE : Calls to this function may be rplaced with just using 'free()'.
+   │  └─ line 147: TODO : might need to export comm_cmd allocation to a seperate func, depends on comm_chan_ctx_t fields.
    ├─ networking_api.h
-   │  ├─ line 18: TODO : Support varaiable length for both send & rsc buffers.
-   │  ├─ line 26: TODO :  Consider removing addrlen from struct since we can infer it from address.
-   │  ├─ line 29: TODO : Switch to static allocated pointer (char ip[16]) or using string API.
-   │  ├─ line 31: TODO : Switch to dynamic allocated pointer (char *send_buff)
-   │  └─ line 33: TODO : Switch to dynamic allocated pointer (char *send_buff)
+   │  ├─ line 20: TODO : Support varaiable length for both send & rsc buffers.
+   │  ├─ line 28: TODO :  Consider removing addrlen from struct since we can infer it from address.
+   │  ├─ line 31: TODO : Switch to static allocated pointer (char ip[16]) or using string API.
+   │  ├─ line 33: TODO : Switch to dynamic allocated pointer (char *send_buff)
+   │  └─ line 35: TODO : Switch to dynamic allocated pointer (char *send_buff)
    ├─ node.c
-   │  ├─ line 22: TODO : Move handle_error_en & handle_error into some error_handler_api.h file & start using it.
    │  ├─ line 23: TODO : Move handle_error_en & handle_error into some error_handler_api.h file & start using it.
-   │  ├─ line 51: TODO : This list of cmds should be changed & ratified.
-   │  ├─ line 68: TODO : Get processes_cmds_list from user cmd line or config_appname.yml file.
-   │  ├─ line 72: TODO : Manage return values. Also return values of cmd_line_parser module.
-   │  ├─ line 75: TODO : Consider having CONFIG_FILE_PATH_NODE & CONFIG_FILE_PATH_PROCESSES_MGR recieved as input from user & not from macro.
-   │  ├─ line 82: TODO : Support non unix platforms.
-   │  ├─ line 83: TODO : Add support for all kind of communication protocols (Not only IPv4)
-   │  ├─ line 84: TODO : Add logger capabilities.
-   │  ├─ line 85: TODO : Add shared memory between client & server optionally by user(user-decided or default size)
-   │  ├─ line 86: TODO : Add config file support as input & parsed by parser. Config file will include all possibale params & if not specified by user, will resault in default config.
-   │  ├─ line 87: TODO : Support multiline todos detection.
-   │  ├─ line 88: TODO : Add unit-testing framework.
-   │  ├─ line 90: TODO : Decouple process utilities from node(client-server) front-end app.
-   │  ├─ line 93: TODO : Use doxygen to upload documentation online.
-   │  ├─ line 97: TODO : Implement. (The following is not the actual logic required.)
-   │  ├─ line 164: TODO : Manage return values. Also return values of cmd_line_parser module.
-   │  ├─ line 166: TODO : Get processes_cmds_list from user cmd line or config_appname.yml file.
-   │  ├─ line 170: TODO : Consider having CONFIG_FILE_PATH_NODE & CONFIG_FILE_PATH_PROCESSES_MGR recieved as input from user & not from macro.
-   │  ├─ line 173: TODO : Place node_interact before procs_mgr_run & enable user ineraction to create processes.
-   │  ├─ line 180: TODO : Support non unix platforms.
-   │  ├─ line 181: TODO : Add support for all kind of communication protocols (Not only IPv4)
-   │  ├─ line 182: TODO : Add logger capabilities.
-   │  ├─ line 183: TODO : Add shared memory between client & server optionally by user(user-decided or default size)
-   │  ├─ line 184: TODO : Add config file support as input & parsed by parser. Config file will include all possibale params & if not specified by user, will resault in default config.
-   │  ├─ line 185: TODO : Support multiline todos detection.
-   │  ├─ line 186: TODO : Add unit-testing framework.
-   │  ├─ line 188: TODO : Decouple process utilities from node(client-server) front-end app.
-   │  └─ line 191: TODO : Use doxygen to upload documentation online.
+   │  ├─ line 52: TODO : This list of cmds should be changed & ratified.
+   │  ├─ line 71: TODO : Make use of 'comm_chan_t' pointer.
+   │  ├─ line 92: TODO : Implement. (The following is not the actual logic required.)
+   │  ├─ line 179: TODO : Manage return values. Also return values of cmd_line_parser module.
+   │  ├─ line 181: TODO : Get procs_cmds_list from user cmd line or config_appname.yml file.
+   │  ├─ line 185: TODO : Consider having CONFIG_FILE_PATH_NODE & CONFIG_FILE_PATH_PROCESSES_MGR recieved as input from user & not from macro.
+   │  ├─ line 188: TODO : Place comm_interact before procs_mgr_run & enable user ineraction to create processes.
+   │  ├─ line 198: TODO : Support non unix platforms.
+   │  ├─ line 199: TODO : Add support for all kind of communication protocols (Not only IPv4)
+   │  ├─ line 200: TODO : Add logger capabilities.
+   │  ├─ line 201: TODO : Add shared memory between client & server optionally by user(user-decided or default size)
+   │  ├─ line 202: TODO : Add config file support as input & parsed by parser. Config file will include all possibale params & if not specified by user, will resault in default config.
+   │  ├─ line 203: TODO : Support multiline todos detection.
+   │  ├─ line 204: TODO : Add unit-testing framework.
+   │  ├─ line 206: TODO : Decouple process utilities from node(client-server) front-end app.
+   │  └─ line 209: TODO : Use doxygen to upload documentation online.
    ├─ pipe_utils.c
-   │  ├─ line 37: TODO : Need to use malloc in order to allocate pipe_ctx structure if actually required by user.
-   │  ├─ line 39: TODO : Get 'direction' from user config_process file.
-   │  ├─ line 49: TODO : Consider removing all pip APIs that calls 'handle_pipe' & only use 'handle_pipe'.
-   │  ├─ line 126: TODO : Rename to 'pipe_init'
-   │  └─ line 178: TODO : Rename to 'pipe_exit'
+   │  ├─ line 31: TODO : Need to use malloc in order to allocate pipe_ctx structure if actually required by user.
+   │  ├─ line 33: TODO : Get 'direction' from user config_process file.
+   │  ├─ line 43: TODO : Consider removing all pipe APIs that calls 'handle_pipe' & only use 'handle_pipe'.
+   │  ├─ line 81: TODO : Do I really need to use STDIN_FILENO or maybe it's better to use another fd?
+   │  ├─ line 121: TODO : Rename to 'pipe_init'
+   │  └─ line 173: TODO : Rename to 'pipe_exit'
    ├─ pipe_utils_api.h
-   │  └─ line 25: TODO : Delete enum after config.yml file is ready.
-   ├─ process_mgr.c
+   │  └─ line 27: TODO : Delete enum after config.yml file is ready.
+   ├─ procs_mgr.c
    │  ├─ line 33: TODO : Add support for multi-piping.
    │  ├─ line 111: TODO : No need in both ret & status
    │  ├─ line 117: FIXME : Race condition when client process is created before server.
    │  └─ line 124: TODO : Handle 'status' before reusing it.
-   ├─ process_mgr_api.h
+   ├─ procs_mgr_api.h
    │  └─ line 17: TODO : Get this value from user by counting the number of executables he configured in config_processes.yml
    ├─ server.c
-   │  └─ line 72: TODO : Support more than one client by accepting more connections.(loop accept.)
+   │  └─ line 71: TODO : Support more than one client by accepting more connections.(loop accept.)
    ├─ str_utils_api.h
    │  └─ line 1: TODO : Export str_utils as a stand alone package.
    └─ yaml_parser.c
