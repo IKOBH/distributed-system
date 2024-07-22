@@ -57,16 +57,3 @@ int comm_interact(comm_if_t *comm_if, comm_chan_ctx_t *node_comm_ctx);
 comm_chan_ctx_t *comm_alloc_ctx(chan_t chan_type, int input_buffer_byte_size);
 void comm_init_ctx(comm_chan_ctx_t *node_comm_ctx, void *resource);
 void comm_release_ctx(comm_chan_ctx_t *node_comm_ctx);
-
-// typedef struct interaction_ctx_t
-// {
-//         char *input_buff;
-//         cmd_ctx_t *cmd_ctx;
-//         pipe_ctx_t **pipe_ctx_list;
-// } interaction_ctx_t;
-
-// typedef struct interaction_t
-// {
-//         communication_interface_t *interface;
-//         // Module-specific data can go here
-// } interaction_t;
