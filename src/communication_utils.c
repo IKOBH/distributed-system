@@ -182,23 +182,3 @@ void comm_release_ctx(comm_chan_ctx_t *comm_chan_ctx)
         free(comm_chan_ctx->comm_chan);
         free(comm_chan_ctx);
 }
-
-// /**
-//  * @brief       Text
-//  *
-//  * @param       pipe_ctx_list   My Param doc
-//  */
-// void interact(interaction_t *interaction, communication_interface_t **interface)
-// {
-//         interaction->interface = interface;
-// }
-
-// /**
-//  * @brief       Text
-//  *
-//  * @param       pipe_ctx_list   My Param doc
-//  */
-// void init(interaction_t *interaction, communication_interface_t **interface)
-// {
-//         interaction->interface = interface;
-// }

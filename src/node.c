@@ -167,7 +167,6 @@ int node_act_on_cmd(comm_chan_ctx_t *comm_chan_ctx)
 int main(int argc, char **argv)
 {
         processes_ctx_t processes_ctx;
-        // interaction_t node_interaction;
         comm_chan_ctx_t *user_to_node_comm_ctx = comm_alloc_ctx(E_CHANNEL_PIPE, INPUT_BUFFER_BYTE_SIZE);
         comm_chan_ctx_t *node_to_client_comm_ctx = comm_alloc_ctx(E_CHANNEL_PIPE, OUTPUT_BUFFER_BYTE_SIZE);
         comm_init_ctx(user_to_node_comm_ctx, stdin);
@@ -188,8 +187,6 @@ int main(int argc, char **argv)
         // TODO: Place comm_interact before procs_mgr_run & enable user ineraction to create processes.
         procs_mgr_run(procs_cmds_list, user_to_node_comm_ctx->chan_specific_ctx);
         comm_interact(&comm_if, user_to_node_comm_ctx);
-        // init(node_interaction);
-        // interact(&node_interaction);
         comm_release_ctx(node_to_client_comm_ctx);
         comm_release_ctx(user_to_node_comm_ctx);
         return EXIT_SUCCESS;
