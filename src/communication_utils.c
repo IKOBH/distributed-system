@@ -1,3 +1,14 @@
+/**
+ * @file        communication_utils.c
+ * @author      Shahar Avidar   (ikobh7@gmail.com)
+ * @brief       Text
+ * @version     0.1
+ * @date        2024-07-23
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -7,7 +18,13 @@
 #include "networking_api.h"
 #include "procs_mgr_api.h"
 
-static int node_get_network_input(comm_chan_ctx_t *comm_chan_ctx)
+/**
+ * @brief       Text
+ *
+ * @param       comm_chan_ctx   My Param doc
+ * @return      int
+ */
+static int comm_get_network_input(comm_chan_ctx_t *comm_chan_ctx)
 {
         int ret = 0;
         int bytes_recived = 0;
@@ -29,10 +46,10 @@ static int node_get_network_input(comm_chan_ctx_t *comm_chan_ctx)
 /**
  * @brief       Text
  *
- * @param       node_interaction_ctx My Param doc
+ * @param       comm_chan_ctx   My Param doc
  * @return      int
  */
-static int node_get_pipe_input(comm_chan_ctx_t *comm_chan_ctx)
+static int comm_get_pipe_input(comm_chan_ctx_t *comm_chan_ctx)
 {
         int ret = 0;
 
@@ -65,10 +82,10 @@ static int comm_get_input(comm_chan_ctx_t *comm_chan_ctx)
         switch (comm_chan_ctx->comm_chan->channel)
         {
         case E_CHANNEL_PIPE:
-                ret |= node_get_pipe_input(comm_chan_ctx);
+                ret |= comm_get_pipe_input(comm_chan_ctx);
                 break;
         case E_CHANNEL_NETWORK:
-                ret |= node_get_network_input(comm_chan_ctx);
+                ret |= comm_get_network_input(comm_chan_ctx);
                 break;
 
         default:
@@ -82,7 +99,8 @@ static int comm_get_input(comm_chan_ctx_t *comm_chan_ctx)
 /**
  * @brief       Text
  *
- * @param       node_interaction_ctx My Param doc
+ * @param       comm_if         My Param doc
+ * @param       comm_chan_ctx   My Param doc
  * @return      int
  */
 int comm_interact(comm_if_t *comm_if, comm_chan_ctx_t *comm_chan_ctx)
@@ -103,6 +121,12 @@ int comm_interact(comm_if_t *comm_if, comm_chan_ctx_t *comm_chan_ctx)
         return ret;
 }
 
+/**
+ * @brief       Text
+ *
+ * @param       chan_type       My Param doc
+ * @return      void*
+ */
 static void *comm_alloc_res(chan_t chan_type)
 {
         switch (chan_type)
@@ -120,6 +144,11 @@ static void *comm_alloc_res(chan_t chan_type)
         return NULL;
 }
 
+/**
+ * @brief       Text
+ *
+ * @param       resource        My Param doc
+ */
 static void comm_release_res(void *resource)
 {
         // NOTE: Calls to this function may be rplaced with just using 'free()'.
@@ -132,10 +161,9 @@ static void comm_release_res(void *resource)
 /**
  * @brief       Text
  *
- * @param       input_fd        My Param doc
- * @param       input_stream    My Param doc
+ * @param       chan_type       My Param doc
  * @param       input_buffer_byte_size My Param doc
- * @return      node_comm_ctx_t*
+ * @return      comm_chan_ctx_t*
  */
 comm_chan_ctx_t *comm_alloc_ctx(chan_t chan_type, int input_buffer_byte_size)
 {
@@ -157,9 +185,8 @@ comm_chan_ctx_t *comm_alloc_ctx(chan_t chan_type, int input_buffer_byte_size)
 /**
  * @brief       Text
  *
- * @param       node_interaction_ctx My Param doc
- * @param       input_fd        My Param doc
- * @param       input_stream    My Param doc
+ * @param       comm_chan_ctx   My Param doc
+ * @param       resource        My Param doc
  */
 void comm_init_ctx(comm_chan_ctx_t *comm_chan_ctx, void *resource)
 {
@@ -169,7 +196,7 @@ void comm_init_ctx(comm_chan_ctx_t *comm_chan_ctx, void *resource)
 /**
  * @brief       Text
  *
- * @param       node_interaction_ctx My Param doc
+ * @param       comm_chan_ctx   My Param doc
  */
 void comm_release_ctx(comm_chan_ctx_t *comm_chan_ctx)
 {
