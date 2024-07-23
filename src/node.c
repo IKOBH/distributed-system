@@ -192,7 +192,7 @@ int main(int argc, char **argv)
         return EXIT_SUCCESS;
 }
 
-// TODO: Support non unix platforms.
+// TODO: Support non unix platforms (Consider using APR: https://apr.apache.org/)
 // TODO: Add support for all kind of communication protocols (Not only IPv4)
 // TODO: Add logger capabilities.
 // TODO: Add shared memory between client & server optionally by user(user-decided or default size)
