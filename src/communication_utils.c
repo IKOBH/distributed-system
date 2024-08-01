@@ -168,7 +168,7 @@ static void comm_release_res(void *resource)
 comm_chan_ctx_t *comm_alloc_ctx(chan_t chan_type, int input_buffer_byte_size)
 {
         comm_chan_ctx_t *comm_chan_ctx;
-
+        // TODO: Check allocation return values and free previously allocated resources in case of failure.
         comm_chan_ctx = (comm_chan_ctx_t *)malloc(sizeof(comm_chan_ctx_t));
         comm_chan_ctx->comm_chan = (comm_chan_t *)malloc(sizeof(comm_chan_t));
         comm_chan_ctx->comm_chan->channel = chan_type;
