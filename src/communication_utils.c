@@ -111,7 +111,9 @@ int comm_interact(comm_if_t *comm_if, comm_chan_ctx_t *comm_chan_ctx)
         {
                 printf("> ");
                 ret |= comm_get_input(comm_chan_ctx);
-                ret |= comm_if->comm_if_interpret_input(comm_chan_ctx);
+                // TODO: Decouple input parsing & action (comm_if_parse_input & comm_if_act_on_cmd) from comm_utils module to protocol module.
+                //       Use anothre thread for it.
+                ret |= comm_if->comm_if_parse_input(comm_chan_ctx);
                 ret |= comm_if->comm_if_act_on_cmd(comm_chan_ctx);
 
                 if (ret)
@@ -162,10 +164,10 @@ static void comm_release_res(void *resource)
  * @brief       Text
  *
  * @param       chan_type       My Param doc
- * @param       input_buffer_byte_size My Param doc
+ * @param       buffer_byte_count My Param doc
  * @return      comm_chan_ctx_t*
  */
-comm_chan_ctx_t *comm_alloc_ctx(chan_t chan_type, int input_buffer_byte_size)
+comm_chan_ctx_t *comm_alloc_ctx(chan_t chan_type, int buffer_byte_count)
 {
         comm_chan_ctx_t *comm_chan_ctx;
         // TODO: Check allocation return values and free previously allocated resources in case of failure.
@@ -173,7 +175,7 @@ comm_chan_ctx_t *comm_alloc_ctx(chan_t chan_type, int input_buffer_byte_size)
         comm_chan_ctx->comm_chan = (comm_chan_t *)malloc(sizeof(comm_chan_t));
         comm_chan_ctx->comm_chan->channel = chan_type;
         comm_chan_ctx->comm_chan->resources = comm_alloc_res(chan_type);
-        comm_chan_ctx->comm_chan->buffer = (char *)malloc(input_buffer_byte_size * sizeof(char));
+        comm_chan_ctx->comm_chan->buffer = (char *)malloc(buffer_byte_count * sizeof(char));
         // TODO: might need to export comm_cmd allocation to a seperate func, depends on comm_chan_ctx_t fields.
         comm_chan_ctx->comm_cmd = (comm_cmd_t *)(malloc(sizeof(comm_cmd_t)));
         // TODO: Move the 'procs_mgr_alloc_pipes_ctxs' call to 'comm_utils_wrapper.h' with all other outer API calls.

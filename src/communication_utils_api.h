@@ -49,7 +49,7 @@ typedef struct commmunication_channel_ctx_t
 
 typedef struct communication_interface_t
 {
-        int (*comm_if_interpret_input)(comm_chan_ctx_t *comm_chan_ctx);
+        int (*comm_if_parse_input)(comm_chan_ctx_t *comm_chan_ctx);
         int (*comm_if_act_on_cmd)(comm_chan_ctx_t *comm_chan_ctx);
 } comm_if_t;
 
