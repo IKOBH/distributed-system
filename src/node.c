@@ -58,7 +58,7 @@ typedef enum
 // communication_interface_t node_interaction_interface = {
 //     .interact_loop = node_interact,
 //     .get_input = comm_get_input,
-//     .interpret_input = node_interpret_input,
+//     .interpret_input = node_parse_input,
 //     .act_on_cmd = node_act_on_cmd};
 typedef struct node_cmd_ctx_t
 {
@@ -83,7 +83,7 @@ typedef struct node_communication_ctx_t
  * @param       node_interaction_ctx My Param doc
  * @return      int
  */
-int node_interpret_input(comm_chan_ctx_t *comm_chan_ctx)
+int node_parse_input(comm_chan_ctx_t *comm_chan_ctx)
 {
         int ret = 0;
 
@@ -172,7 +172,7 @@ int main(int argc, char **argv)
         comm_init_ctx(user_to_node_comm_ctx, stdin);
         comm_init_ctx(node_to_client_comm_ctx, stdin);
         comm_if_t comm_if;
-        comm_if.comm_if_interpret_input = node_interpret_input;
+        comm_if.comm_if_parse_input = node_parse_input;
         comm_if.comm_if_act_on_cmd = node_act_on_cmd;
 
         // TODO: Manage return values. Also return values of cmd_line_parser module.
