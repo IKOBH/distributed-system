@@ -30,7 +30,7 @@ typedef struct communication_channel_t
 {
         chan_t channel;
         chan_dir_t direction;
-        void *resources;
+        int fd;
         char *buffer;
 } comm_chan_t;
 
@@ -54,6 +54,6 @@ typedef struct communication_interface_t
 } comm_if_t;
 
 int comm_interact(comm_if_t *comm_if, comm_chan_ctx_t *node_comm_ctx);
-comm_chan_ctx_t *comm_alloc_ctx(chan_t chan_type, int input_buffer_byte_size);
-void comm_init_ctx(comm_chan_ctx_t *node_comm_ctx, void *resource);
+comm_chan_ctx_t *comm_alloc_ctx(int buffer_byte_count);
+void comm_init_ctx(comm_chan_ctx_t *comm_chan_ctx, chan_t chan_type, int fd);
 void comm_release_ctx(comm_chan_ctx_t *node_comm_ctx);
