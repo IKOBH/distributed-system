@@ -22,6 +22,9 @@ typedef enum channel_t
 {
         E_CHANNEL_NETWORK,
         E_CHANNEL_PIPE,
+        E_CHANNEL_STDIN,
+        E_CHANNEL_STDOUT,
+        E_CHANNEL_STDERR,
         E_CHANNEL_COUNT,
         E_CHANNEL_INVALID = -1
 } chan_t;

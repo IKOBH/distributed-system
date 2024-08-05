@@ -170,12 +170,7 @@ int main(int argc, char **argv)
         comm_chan_ctx_t *user_to_node_comm_ctx = comm_alloc_ctx(INPUT_BUFFER_BYTE_SIZE);
         comm_chan_ctx_t *node_to_client_comm_ctx = comm_alloc_ctx(OUTPUT_BUFFER_BYTE_SIZE);
 
-        // TODO: user_to_node_comm_ctx should be initialized with a new type instead of E_CHANNEL_PIPE.
-        //       It actually doesn't have a channel since it gets input from stdin which was forked from the terminal.
-        //       On second thought, that's a channel too. Just an inherited one.
-        //       So basically, each process should have 3 default channels: stdin, stdout, stderr.
-
-        comm_init_ctx(user_to_node_comm_ctx, E_CHANNEL_PIPE, STDIN_FILENO);
+        comm_init_ctx(user_to_node_comm_ctx, E_CHANNEL_STDIN, STDIN_FILENO);
         comm_init_ctx(node_to_client_comm_ctx, E_CHANNEL_PIPE, STDIN_FILENO);
         comm_if_t comm_if;
         comm_if.comm_if_parse_input = node_parse_input;

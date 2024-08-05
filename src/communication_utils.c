@@ -93,6 +93,7 @@ static int comm_get_input(comm_chan_ctx_t *comm_chan_ctx)
 
         switch (comm_chan_ctx->comm_chan->channel)
         {
+        case E_CHANNEL_STDIN:
         case E_CHANNEL_PIPE:
                 ret |= comm_get_pipe_input(comm_chan_ctx);
                 break;
