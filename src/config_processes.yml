@@ -1,0 +1,32 @@
+- name: "My Server"
+  command: "./server"
+  executable_path: "/home/iko/GitHub/distributed-system/build/server"
+  executable_args:
+    - "--config"
+    - "config.yaml"
+    - "--verbose"
+  pipes:
+    - name: "pipe1"
+      direction: "input"
+    - name: "pipe2"
+      direction: "output"
+  sockets:
+    - name: "socket1"
+      direction: "input"
+    - name: "socket2"
+      direction: "output"
+- name: "My Client"
+  command: "./client"
+  executable_path: "/home/iko/GitHub/distributed-system/build/client"
+  executable_args:
+    - "process_two.py"
+  pipes:
+    - name: "pipe2"
+      direction: "input"
+    - name: "pipe4"
+      direction: "output"
+  sockets:
+    - name: "socket3"
+      direction: "input"
+    - name: "socket4"
+      direction: "duplex"

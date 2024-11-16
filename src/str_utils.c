@@ -11,6 +11,7 @@
 
 #include <string.h>
 #include <stdarg.h>
+#include <stdlib.h>
 
 /**
  * @brief       The strcumlen() function calculates the cumulative length of 'cnt' strings

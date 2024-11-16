@@ -39,3 +39,12 @@ size_t strcumlen(int cnt, ...);
  * @return      char*
  */
 char *str_embed(const char *src, const char *tok, int pos, char *dest);
+
+/**
+ * @brief       Text
+ *
+ * @param       src             My Param doc
+ * @param       count           My Param doc
+ * @return      char**
+ */
+char **strdup_array(char **src, size_t count);

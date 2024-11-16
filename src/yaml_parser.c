@@ -15,189 +15,158 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <yaml.h>
+#include <libfyaml.h>
 
 #include "yaml_parser_api.h"
 #include "str_utils_api.h"
 
-#define SUFFIX ("_flat")
-#define DELIMITER ('.')
-#define NAME_MAX_LEN (50)
-#define VALUE_MAX_LEN (200)
-
-char *cat_suffix_to_file_name(const char *file_name, const char *suffix, char *new_file_name)
+static struct fy_document *get_fyd_from_file_pointer(FILE *config_file)
 {
-        char *last_delim_p = strrchr(file_name, DELIMITER);
-        if (last_delim_p == NULL)
+        static struct fy_document *fyd = NULL;
+
+        if (fyd == NULL)
         {
-                perror("Invalid file name - extension not found.");
-                exit(EXIT_FAILURE);
-        }
-        return str_embed(file_name, suffix, last_delim_p - file_name, new_file_name);
-}
-
-void update_curr_struct_p(char *struct_name, void *curr_struct_p, void *native_struct)
-{
-        // if (strcmp(struct_name, "B1") == 0)
-        // {
-        //         curr_struct_p = native_struct->
-        // }
-        // else if (strcmp(string, "xxx") == 0)
-        // {
-        //         // do something else
-        // }
-        // /* more else if clauses */
-        // else /* default: */
-        // {
-        // }
-}
-
-void yaml_constrct_native_struct()
-{
-}
-
-int yaml_parse_file(const char *file_name, void *native_struct)
-{
-        yaml_parser_t parser;
-        yaml_event_t event;
-        bool done = false;
-        int status = 1;
-        int map_stack = 0;
-        int seq_stack = 0;
-        bool update_struct_name = false;
-        bool is_field_val_pair = false;
-        bool is_field = false;
-        bool is_val = false;
-        // TODO: Handle cases where (name > NAME_MAX_LEN) or (value > VALUE_MAX_LEN)
-        //       by checking strlen(event.data.scalar.value) > NAME_MAX_LEN\VALUE_MAX_LEN
-        //       & calling malloc & free.
-        char struct_name[NAME_MAX_LEN];
-        char field_name[NAME_MAX_LEN];
-        char value[VALUE_MAX_LEN];
-        void *curr_struct_p = NULL;
-
-        /* Set a file input. */
-        FILE *file_p = fopen(file_name, "r");
-        if (file_p == NULL)
-        {
-                perror("Failed to open config file");
-                exit(EXIT_FAILURE);
-        }
-
-        /* Create the Parser object. */
-        status = yaml_parser_initialize(&parser);
-        if (!status)
-                goto close_file;
-
-        yaml_parser_set_input_file(&parser, file_p);
-
-        /* Read the event sequence. */
-        while (!done)
-        {
-                /* Get the next event. */
-                status = yaml_parser_parse(&parser, &event);
-                if (!status)
-                        goto destroy_parser;
-
-                switch (event.type)
+                fyd = fy_document_build_from_fp(NULL, config_file);
+                if (!fyd)
                 {
-                case YAML_MAPPING_START_EVENT:
-                        map_stack++;
-                        // printf("MAP START: =\t%d\n", map_stack);
-                        if (map_stack == 1)
-                        {
-                                update_struct_name = true;
-                                is_field_val_pair = false;
-                        }
-                        if (map_stack == 2)
-                        {
-                                is_field_val_pair = true;
-                                is_field = true;
-                        }
-                        // printf("Mapping:\t\t%s\n", event.data.mapping_start.anchor);
-                        break;
-                case YAML_MAPPING_END_EVENT:
-                        map_stack--;
-                        printf("\n");
-                        break;
-                case YAML_SEQUENCE_START_EVENT:
-                        seq_stack++;
-                        // printf("SEQ START: =\t%d\n", seq_stack);
-                        //  printf("Sequence: anchor =\t%s\n", event.data.sequence_start.anchor);
-                        //  printf("Sequence: anchor =\t%s\n", event.data.sequence_start.anchor);
-                        break;
-                case YAML_SEQUENCE_END_EVENT:
-                        seq_stack--;
-                        // printf("SEQ END: =\t%d\n", seq_stack);
-                        break;
-                case YAML_ALIAS_EVENT:
-                        printf("\t%s", event.data.alias.anchor);
-                        //  Handle alias
-                        break;
-                case YAML_SCALAR_EVENT:
-                        if (update_struct_name)
-                        {
-                                strcpy(struct_name, event.data.scalar.value);
-                                update_curr_struct_p(struct_name, curr_struct_p, native_struct);
-                                update_struct_name = false;
-                                printf("%s:\n", struct_name);
-                        }
-                        if (is_field_val_pair)
-                        {
-                                if (is_field)
-                                {
-                                        strcpy(field_name, event.data.scalar.value);
-                                        is_field = false;
-                                        is_val = true;
-                                        printf("\t%s:", field_name);
-                                }
-                                else if (is_val)
-                                {
-                                        strcpy(value, event.data.scalar.value);
-                                        is_val = false;
-                                        printf("\t%s", value);
-                                }
-                        }
-                        break;
-                case YAML_STREAM_END_EVENT:
-                        done = true;
-                        break;
-                default:
-                        break;
-
-                        /* Destroy event object. */
-                        yaml_event_delete(&event);
+                        perror("Failed to build document from file");
+                        exit(EXIT_FAILURE);
                 }
-                yaml_constrct_native_struct();
         }
 
-        /* error handling */
-destroy_parser:
-        /* Destroy Parser object. */
-        yaml_parser_delete(&parser);
-close_file:
-        if (fclose(file_p) != 0)
-                perror("Failed to close file");
-
-        // TODO: Refactor the return value to use only status and not status-1.
-        return status - 1;
+        return fyd;
 }
 
-void yaml_load_file(const char *file_name, void *native_struct)
+int yml_parser_get_process_count(FILE *config_file)
 {
-        // int new_file_name_len = strcumlen(2, file_name, SUFFIX) + 1;
-        // char *new_file_name = (char *)malloc(new_file_name_len);
-        // if (new_file_name == NULL)
-        // {
-        //         perror("Failed to allocate memory for new file name.");
-        //         exit(EXIT_FAILURE);
-        // }
+        struct fy_document *fyd = get_fyd_from_file_pointer(config_file);
 
-        // new_file_name = cat_suffix_to_file_name(file_name, SUFFIX, new_file_name);
-        // printf("new_file_name = %s\n", new_file_name);
+        return fy_node_sequence_item_count(fy_document_root(fyd));
+}
 
-        // free(new_file_name);
+struct fy_node *yml_parser_get_process(FILE *config_file, int pos)
+{
+        struct fy_document *fyd = get_fyd_from_file_pointer(config_file);
 
-        // yaml_compose_event_tree();
-        yaml_parse_file(file_name, native_struct);
+        return fy_node_sequence_get_by_index(fy_document_root(fyd), pos);
+}
+
+const char *yml_parser_alloc_executable_path(struct fy_node *process_node)
+{
+        struct fy_node *executable_path_node = fy_node_by_path(process_node, "/executable_path", FY_NT, FYNWF_PTR_DEFAULT);
+        if (!executable_path_node || !fy_node_is_scalar(executable_path_node))
+        {
+                perror("Failed to get executable_path node or node is not a scalar");
+                exit(EXIT_FAILURE);
+        }
+
+        return fy_node_get_scalar0(executable_path_node);
+}
+
+int yml_parser_get_executable_args_cnt(struct fy_node *process_node)
+{
+        struct fy_node *executable_args_node = fy_node_by_path(process_node, "/executable_args", FY_NT, FYNWF_PTR_DEFAULT);
+        if (!executable_args_node || !fy_node_is_sequence(executable_args_node))
+        {
+                perror("Failed to get executable_args node or node is not a sequence");
+                exit(EXIT_FAILURE);
+        }
+
+        return fy_node_sequence_item_count(executable_args_node);
+}
+
+char **yml_parser_alloc_executable_args(struct fy_node *process_node)
+{
+        struct fy_node *executable_args_node = fy_node_by_path(process_node, "/executable_args", FY_NT, FYNWF_PTR_DEFAULT);
+        if (!executable_args_node || !fy_node_is_sequence(executable_args_node))
+        {
+                perror("Failed to get executable_args node or node is not a sequence");
+                exit(EXIT_FAILURE);
+        }
+
+        int count = fy_node_sequence_item_count(executable_args_node);
+        char **args = malloc((count + 1) * sizeof(char *));
+        if (!args)
+        {
+                perror("Failed to allocate memory for executable_args");
+                exit(EXIT_FAILURE);
+        }
+
+        for (int i = 0; i < count; i++)
+        {
+                struct fy_node *arg_node = fy_node_sequence_get_by_index(executable_args_node, i);
+                args[i] = strdup(fy_node_get_scalar0(arg_node));
+                if (!args[i])
+                {
+                        perror("Failed to duplicate argument string");
+                        exit(EXIT_FAILURE);
+                }
+        }
+        args[count] = NULL;
+
+        return args;
+}
+
+int yml_parser_get_pipe_count(fy_node_t *process_node)
+{
+        struct fy_node *pipes_node = fy_node_by_path(process_node, "/pipes", FY_NT, FYNWF_PTR_DEFAULT);
+        if (!pipes_node)
+                return 0;
+        if (!fy_node_is_sequence(pipes_node))
+        {
+                perror("Node is not a sequence");
+                exit(EXIT_FAILURE);
+        }
+
+        return fy_node_sequence_item_count(pipes_node);
+}
+
+int yml_parser_get_socket_count(fy_node_t *process_node)
+{
+        struct fy_node *sockets_node = fy_node_by_path(process_node, "/sockets", FY_NT, FYNWF_PTR_DEFAULT);
+        if (!sockets_node)
+                return 0;
+        if (!fy_node_is_sequence(sockets_node))
+        {
+                perror("Node is not a sequence");
+                exit(EXIT_FAILURE);
+        }
+
+        return fy_node_sequence_item_count(sockets_node);
+}
+
+struct fy_node *yml_parser_get_pipe(fy_node_t *process_node, int pos)
+{
+        struct fy_node *pipes_node = fy_node_by_path(process_node, "/pipes", FY_NT, FYNWF_PTR_DEFAULT);
+        if (!pipes_node || !fy_node_is_sequence(pipes_node))
+        {
+                perror("Failed to get pipes node or node is not a sequence");
+                exit(EXIT_FAILURE);
+        }
+
+        return fy_node_sequence_get_by_index(pipes_node, pos);
+}
+
+struct fy_node *yml_parser_get_socket(fy_node_t *process_node, int pos)
+{
+        struct fy_node *sockets_node = fy_node_by_path(process_node, "/sockets", FY_NT, FYNWF_PTR_DEFAULT);
+        if (!sockets_node || !fy_node_is_sequence(sockets_node))
+        {
+                perror("Failed to get sockets node or node is not a sequence");
+                exit(EXIT_FAILURE);
+        }
+
+        return fy_node_sequence_get_by_index(sockets_node, pos);
+}
+
+const char *yml_parser_get_channel_direction(struct fy_node *chan_node)
+{
+        struct fy_node *direction_node = fy_node_by_path(chan_node, "/direction", FY_NT, FYNWF_PTR_DEFAULT);
+        if (!direction_node || !fy_node_is_scalar(direction_node))
+        {
+                perror("Failed to get direction node or node is not a scalar");
+                exit(EXIT_FAILURE);
+        }
+
+        return fy_node_get_scalar0(direction_node);
 }

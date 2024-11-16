@@ -13,7 +13,7 @@
 
 #include <arpa/inet.h>
 
-#include "communication_utils_api.h"
+#include "channel_api.h"
 
 #define IP ("127.0.0.1")
 #define PORT (8080)
@@ -43,6 +43,6 @@ typedef struct network_ctx_t
 
 typedef struct network_channel_t
 {
-        comm_chan_t *net_chan;
+        chan_cb_t *net_chan;
         net_ctx_t *net_ctx;
 } net_chan_t;
